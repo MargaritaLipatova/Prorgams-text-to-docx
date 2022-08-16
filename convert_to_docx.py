@@ -36,7 +36,7 @@ class Src2Docx():
         style = self.doc.styles['Normal']
         style.font.size = Pt(14)
         style.font.name = 'Times New Roman'
-        p = self.doc.add_paragraph(text_str)
+        p = self.doc.add_paragraph(text)
         run = p.add_run()
         run.add_break(WD_BREAK.PAGE)
         p_fmt = p.paragraph_format
@@ -55,18 +55,29 @@ class Src2Docx():
     def save_docx(self, path):
         self.doc.save(path)
         
+def get_files(folder):
+    extensions = ['cpp', 'h']
+    path_to_conf = "D:\\GitHub\Prorgams-text-to-docx\.filesextension"
+
+    f = open(path_to_conf,'r', encoding="utf-8")
+    extensions = f.read()
+    f.close()
+    extensions = extensions.split("\n")
+    res = []    
+    for root, dirs, files in os.walk(folder, topdown=False):
+        for name in files:
+            path = os.path.join(root, name)
+            if path.split('.')[-1] in extensions:
+                res.append(path)
+    return res
+
+
+path_to = "D:\\GitHub\machine-learning-cheat-sheet"
 
 cwd = os.getcwd()
 path_to_docx = os.path.join(cwd, "document.docx")
-koll = "ЮФКВ.00125-01 12 01"
-path_to_src = "D:\\GitHub\machine-learning-cheat-sheet\machine-learning-cheat-sheet.tex"
-# name_f = os.path.basename(path_to_src)
-# f = open(path_to_src,'r', encoding="utf-8")
-# text_str = f.read()
-# f.close()
 
-path_to = "D:\\GitHub\machine-learning-cheat-sheet"
-files = glob.glob(path_to +'\*.tex')
+files = get_files(path_to)
 
 docc = Src2Docx('D:\\GitHub\\Prorgams-text-to-docx\\template.docx')
 for i in files:
