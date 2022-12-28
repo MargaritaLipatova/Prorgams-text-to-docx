@@ -7,7 +7,7 @@ Created on Wed Dec 14 23:24:09 2022
 from PyQt5 import QtWidgets
 from ui_ishod_w import Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
 from dialog_ChangeExtensions import dialogChangeExtensions  
-#import sys
+
 
 
 class dialogIshodDocx(QtWidgets.QDialog):
@@ -27,8 +27,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
         """ Кнопка 'Изменить расширения...'
             Returns: None
         """
-        _app = dialogChangeExtensions(parent=self)
-        _app.show()
+        _app = dialogChangeExtensions(self)
         a = _app.exec()
         print(a)
         

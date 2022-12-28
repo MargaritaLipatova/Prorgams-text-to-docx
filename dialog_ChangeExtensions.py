@@ -11,7 +11,7 @@ from ui_dialogChangeExtensions import Ui_dialogChangeExtensions # импорт �
 
 class dialogChangeExtensions(QtWidgets.QDialog):
     def __init__(self, parent=None):
-        super(dialogChangeExtensions, self).__init__(parent, QtWidgets.QDialog)#QtCore.Qt.Window)
+        super(dialogChangeExtensions, self).__init__(parent)
         self.ui = Ui_dialogChangeExtensions()
         self.ui.setupUi(self)
          
