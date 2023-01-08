@@ -1,0 +1,5 @@
+Чтобы скомпилировать наш resources.qrcфайл в файл Python с именемresources.py, мы можем использовать --:
+$ pyrcc5 resource.qrc -o resource.py
+
+Чтобы конвертировать .ui-файл в Python-файл с названием design.py, используйте следующую команду:
+$ pyuic5 path/to/design.ui -o output/path/to/design.py
