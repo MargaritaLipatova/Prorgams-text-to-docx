@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Work_Xoma\GitHub\ishod-w.ui'
+# Form implementation generated from reading ui file 'ui_files/ishod_w.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -105,6 +105,10 @@ class Ui_DialogIshodDocx(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.pBtn_UpdateTable.setFont(font)
+        self.pBtn_UpdateTable.setText("")
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icon/icon/folder_refresh_icon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.pBtn_UpdateTable.setIcon(icon)
         self.pBtn_UpdateTable.setObjectName("pBtn_UpdateTable")
         self.horizontalLayout_2.addWidget(self.pBtn_UpdateTable)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
@@ -154,7 +158,7 @@ class Ui_DialogIshodDocx(object):
         self.pBtn_ChangeEx.setText(_translate("DialogIshodDocx", "Изменить расширения..."))
         self.checkBox_FolderNesting.setText(_translate("DialogIshodDocx", "с учётом вложенных папок"))
         self.pBtn_AddFilesInFolder.setText(_translate("DialogIshodDocx", "Добавить файлы из папки..."))
-        self.pBtn_UpdateTable.setText(_translate("DialogIshodDocx", "@"))
         self.label_PathIshodDocx.setText(_translate("DialogIshodDocx", "Путь"))
         self.pBtn_PathIshodDocx.setText(_translate("DialogIshodDocx", "Вырать путь к документу..."))
         self.pBtn_CreateDocx.setText(_translate("DialogIshodDocx", "Создать документ"))
+import resources_rc
