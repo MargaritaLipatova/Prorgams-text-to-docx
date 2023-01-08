@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>icon/folder_refresh_icon.ico</file>
+    <file>icon/folder_refresh_outline_icon.ico</file>
+  </qresource>
+</RCC>
