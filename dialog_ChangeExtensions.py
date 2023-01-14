@@ -10,7 +10,15 @@ from ui_files.ui_dialogChangeExtensions import Ui_dialogChangeExtensions # им�
 
 
 class dialogChangeExtensions(QtWidgets.QDialog, Ui_dialogChangeExtensions):
-    def __init__(self, parent=None):
+    """ Диалоговое окно 'Изменить расширения...'.
+        Отображает расширения всех файлов 
+        находящихся в таблице "Файлы исходных кодов".
+        Перед каждым расширением есть checkBox
+        Если галочка установлена, то файл с этим расширением будет 
+        отображаться в таблице, иначе будет скрыт.
+    """
+    def __init__(self, parent=None, filterEx=[]):
+       ##!!!!!!! В стадии написания и отладки
         super(dialogChangeExtensions, self).__init__(parent)
         self.ui = Ui_dialogChangeExtensions()
         self.ui.setupUi(self)
