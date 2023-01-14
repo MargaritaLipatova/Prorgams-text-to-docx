@@ -2,7 +2,7 @@
 """
 Created on Sun Oct 16 13:18:38 2022
 
-@author: Маргарита
+@author: Маргарита, Васильева
 """
 # =============================================================================
 # 
@@ -41,17 +41,17 @@ Created on Sun Oct 16 13:18:38 2022
 # if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
 #     main()  # то запускаем функцию main()    
 # =============================================================================
-
+import sys
 from PyQt5 import QtWidgets
 from dialog_Ishod_w import dialogIshodDocx 
-import sys
 
-
-app = QtWidgets.QApplication([])
-application = dialogIshodDocx()
-application.show()
-
-a = app.exec()
-sys.exit(a)
+if __name__ == "__main__":
+    app = QtWidgets.QApplication([])
+    application = dialogIshodDocx()
+    application.show()
+    
+    a = app.exec()
+    print("Exit program 'ishod-w' ")
+    sys.exit(a)
 
 
