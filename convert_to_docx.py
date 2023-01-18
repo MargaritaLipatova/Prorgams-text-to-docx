@@ -57,7 +57,7 @@ class Src2Docx():
         
 def get_files(folder):
     extensions = ['cpp', 'h']
-    path_to_conf = "D:\\GitHub\Prorgams-text-to-docx\.filesextension"
+    path_to_conf = ".filesextension"
 
     f = open(path_to_conf,'r', encoding="utf-8")
     extensions = f.read()
