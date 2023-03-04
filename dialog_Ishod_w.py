@@ -6,8 +6,13 @@ Created on Wed Dec 14 23:24:09 2022
 """
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from ui_files.ui_ishod_w import Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
 from dialog_ChangeExtensions import dialogChangeExtensions  
+from tableview_SourceCodeFiles import TableSourceCodeFiles  
+from common import *
+#from tableview_SourceCodeFiles import WidgetSourceCodeFiles  
 import os
 
 class dialogIshodDocx(QtWidgets.QDialog):
@@ -15,14 +20,19 @@ class dialogIshodDocx(QtWidgets.QDialog):
     """
     def __init__(self, parent=None):
         super(dialogIshodDocx, self).__init__()
-        self.ui = Ui_DialogIshodDocx() # Инициализация ui-интерфейсов
-        self.ui.setupUi(self)          # Установка ui-интерфейсов
-        self.cwd = os.getcwd()         # Получить текущее местоположение файла программы
-
+        self.ui = Ui_DialogIshodDocx()        # Инициализация ui-интерфейсов
+        self.ui.setupUi(self)                 # Установка ui-интерфейсов
+        self.setWindowTitle("Исход-В v.1.0")  # Название программы с версией
+        self.cwd = os.getcwd()                # Получить текущее местоположение файла программы
         
-
+        # Таблица "Файлы исходных кодов"
+        formlayout = QFormLayout()
+        self.ui.widget_SourceCodeFiles.setLayout(formlayout)
+        self.tvSourceCodeFiles = TableSourceCodeFiles(self)
+        formlayout.addRow(self.tvSourceCodeFiles)
+        
         # Виджет с информацией о расширениях
-        self.ui.wStatusExtensions.setVisible(False) # скрыть информацию
+        self.ui.wStatusExtensions.setVisible(False)  # скрыть информацию
         self.ui.pBtn_ChangeEx.setEnabled(False)      # неактивная кнопка ,т.к. пуста таблица "Файлы исходных кодов"
         
         # Виджет с информацией о расположение сохранненого файла по кнопки "Создать документ..."
@@ -57,18 +67,56 @@ class dialogIshodDocx(QtWidgets.QDialog):
             Открывается диологовое окно файлового проводника.
             Returns: None
         """
-        ##!!!!!!! В стадии написания и отладки
-        dir_choose = QFileDialog.getExistingDirectory(self,                # Родитель
-                                                      "Выберите файлы...", # Название открытого QFileDialog
-                                                      self.cwd             # Начальный путь
-                                                      ) 
+        selected_files = getOpenFilesAndDirs(self)
+        if selected_files:
+            dirSelection = selected_files[0].split("/" + selected_files[0].split("/")[-1])[0]
+            print("dirSelection = ", dirSelection) 
+            
+            dir = QDir(dirSelection.capitalize())
+            if not dir.exists():
+                print("Directory don`t found.") 
+            else:
+                print("Directory found.") 
+                QDirIterator(path, nameFilters)
+                #https://stackoverflow.com/questions/8052460/recursively-iterate-over-all-the-files-in-a-directory-and-its-subdirectories-in
+            print("selected_files", selected_files) 
+            
+            
+            
+            
+            # Подготовка списка 
+            flagFolderNesting = self.ui.checkBox_FolderNesting.isCheckable()
+            # if flagFolderNesting:
+            #     #Анализ папок, какие файлы там находятся и папки
+            # else:
+            
+        
+        
+        # fdialog = QFileDialog(self,                # Родитель
+        #                       "Выберите файлы...", # Название открытого QFileDialog
+        #                       self.cwd             # Начальный путь
+        #                                               )
+        # fdialog.setFileMode(QFileDialog.AnyFile)
+        # fdialog.setViewMode(QFileDialog.Detail)
+        # fdialog.setFileter(QFileDialog.Files|QFileDialog.Dirs);
+        # if fdialog.exec_():
+        #     fileNames = dialog.selectedFiles()
+        #     print("fileNames")
+        #     print(fileNames)
+            
+        
+        # ##!!!!!!! В стадии написания и отладки
+        # dir_choose = QFileDialog.getExistingDirectory(self,                # Родитель
+        #                                               "Выберите файлы...", # Название открытого QFileDialog
+        #                                               self.cwd             # Начальный путь
+        #                                               ) 
 
-        if dir_choose == "":
-            print("\ nОтменить выбор")
-            return
+        # if dir_choose == "":
+        #     print("\ nОтменить выбор")
+        #     return
 
-        print("\ nВы выбрали папку:")
-        print(dir_choose)
+        # print("\ nВы выбрали папку:")
+        # print(dir_choose)
         
         
     def btnClicked_CreateDocx(self)-> None:
