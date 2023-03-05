@@ -14,6 +14,7 @@ def start_main():
     application = dialogIshodDocx()
     application.show()
 
+    print("Start program 'ishod-w' ")
     a = app.exec()
     print("Exit program 'ishod-w' ")
     sys.exit(a)

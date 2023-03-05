@@ -68,6 +68,10 @@ class dialogIshodDocx(QtWidgets.QDialog):
             Returns: None
         """
         selected_files = getOpenFilesAndDirs(self)
+        print("selected_files") 
+        print("selected_files") 
+        print("selected_files") 
+        print("selected_files") 
         if selected_files:
             dirSelection = selected_files[0].split("/" + selected_files[0].split("/")[-1])[0]
             print("dirSelection = ", dirSelection) 
@@ -77,7 +81,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
                 print("Directory don`t found.") 
             else:
                 print("Directory found.") 
-                QDirIterator(path, nameFilters)
+                # QDirIterator(path, nameFilters)
                 #https://stackoverflow.com/questions/8052460/recursively-iterate-over-all-the-files-in-a-directory-and-its-subdirectories-in
             print("selected_files", selected_files) 
             
