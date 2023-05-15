@@ -9,14 +9,66 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
-
 # =============================================================================
-# class TypeSelection(Enum):
-#     File = 0
-#     Dir  = 1
-#     
+# from enum import Enum
+# from enum import auto
+# 
+# class typeSelection(Enum):
+#     File = auto()
+#     Dir  = auto()
+# 
 # =============================================================================
+      
+# ==================================================================      
+# ==================================================================      
+# ==================================================================
+class tableDir():
+    def __init__(self, pathDir):
+        self._pathDir = pathDir
+        self._pathFiles = []
+        self._checkboxDir = False
 
+    @property
+    def checkboxDir(self):
+        return self._checkboxDir
+    
+    @checkboxDir.setter
+    def checkboxDir(self, checkState):
+        self._checkboxDir = checkState
+    
+    @property
+    def pathDir(self):
+        return self._pathDir
+    @pathDir.setter
+    def pathDir(self, pathDir):
+        self._pathDir = pathDir
+    
+    @property
+    def pathFiles(self):
+        return self._pathFiles
+
+    @pathFiles.setter
+    def pathFiles(self, pathFiles):
+        for path in pathFiles:
+            if not self._pathFiles.isExsists(path): 
+                self._pathFiles.append(path)
+    
+    def setPathFile(self, pathFile):
+        if next(filter(lambda x: pathFile in x.keys(), self._pathFiles),None) == None:
+            self._pathFiles.append({pathFile: False})
+            
+        # if pathFile  not in self._pathFiles: 
+        #     self._pathFiles.append({pathFile: False})
+        #     #self._pathFiles.append(pathFile)
+            
+    def clearPathFiles(self):
+        self._pathFiles.clear()
+        self._pathDir.clear()
+        
+      
+# ==================================================================      
+# ==================================================================      
+# ==================================================================
 def getOpenFilesAndDirs(parent=None, caption='', directory='', filter='', initialFilter='', options=None):
     def updateText():
         # обновить содержимое виджета редактирования строки выбранными файлами
@@ -71,6 +123,45 @@ def getOpenFilesAndDirs(parent=None, caption='', directory='', filter='', initia
     dialog.exec_()
     return dialog.selectedFiles()
 
+def scanDir_typeTableDir(res: list, folder): 
+    print(folder)
+    for root, dirs, files in os.walk(folder, topdown=False):
+        r1 = root.replace('\\','/')
+        print(r1)
+        new_tableDir = tableDir(r1)
+        for name in files:
+            path = os.path.join(root, name).replace('\\','/')
+            print(path)
+            new_tableDir.setPathFile(path)
+            #res.append(path)
+        res.append(new_tableDir)
+        
+def scanDir(res: list, folder): 
+    print(folder)
+    for root, dirs, files in os.walk(folder, topdown=False):
+        print(root)
+        for name in files:
+            path = os.path.join(root, name).replace('\\','/')
+            print(path)
+            res.append(path)
+# =============================================================================
+#             if os.path.isdir(path):
+#                 scanDir(res, path)
+# =============================================================================
+
+def scanDir_nesting(folders: list)->list:
+    res = []  
+    print(folders)
+    folders.sort()
+    print(folders)
+
+    if folders:
+        for name in folders:
+            res.append(name)
+            if os.path.isdir(name):
+                scanDir(res, name)
+        
+    return res
 # =============================================================================
 # def scanDir(dirs):
 #     if(!dir.exists()):

@@ -26,10 +26,10 @@ class dialogIshodDocx(QtWidgets.QDialog):
         self.cwd = os.getcwd()                # Получить текущее местоположение файла программы
         
         # Таблица "Файлы исходных кодов"
-        formlayout = QFormLayout()
-        self.ui.widget_SourceCodeFiles.setLayout(formlayout)
+        self.formlayout = QFormLayout()
+        self.ui.widget_SourceCodeFiles.setLayout(self.formlayout)
         self.tvSourceCodeFiles = TableSourceCodeFiles(self)
-        formlayout.addRow(self.tvSourceCodeFiles)
+        self.formlayout.addRow(self.tvSourceCodeFiles)
         
         # Виджет с информацией о расширениях
         self.ui.wStatusExtensions.setVisible(False)  # скрыть информацию
@@ -68,32 +68,39 @@ class dialogIshodDocx(QtWidgets.QDialog):
             Returns: None
         """
         selected_files = getOpenFilesAndDirs(self)
-        print("selected_files") 
-        print("selected_files") 
-        print("selected_files") 
-        print("selected_files") 
+        selected_files.sort()
         if selected_files:
-            dirSelection = selected_files[0].split("/" + selected_files[0].split("/")[-1])[0]
-            print("dirSelection = ", dirSelection) 
-            
-            dir = QDir(dirSelection.capitalize())
-            if not dir.exists():
-                print("Directory don`t found.") 
-            else:
-                print("Directory found.") 
-                # QDirIterator(path, nameFilters)
-                #https://stackoverflow.com/questions/8052460/recursively-iterate-over-all-the-files-in-a-directory-and-its-subdirectories-in
-            print("selected_files", selected_files) 
-            
-            
-            
-            
+                
             # Подготовка списка 
-            flagFolderNesting = self.ui.checkBox_FolderNesting.isCheckable()
-            # if flagFolderNesting:
-            #     #Анализ папок, какие файлы там находятся и папки
-            # else:
+            PathsDir     = self.tvSourceCodeFiles.getPathsDir()
+            saveTableDir = self.tvSourceCodeFiles.getTableDir()
+            dirSelection = selected_files[0].split("/" + selected_files[0].split("/")[-1])[0]
+
+
+            if dirSelection not in PathsDir:
+                # Папки с таким названием ещё не было
+                dir1 = tableDir(dirSelection)
+                saveTableDir.append(dir1)
+            else:
+                # Папка с таким названием была
+                # Выуживаем объект
+                # проверяем наличие файла в списке
+                # добавляем в общий список файл
+                for td in saveTableDir:
+                    if td.pathDir == dirSelection:
+                       dir1 = td
             
+            for name in selected_files:    # Проход по выделенному списку
+                if os.path.isdir(name):    # Проверка названия, что это папка              
+                
+                    #if name in PathsDir
+                    if name not in PathsDir:
+                        if self.ui.checkBox_FolderNesting.isChecked():
+                            scanDir_typeTableDir(saveTableDir, name)
+                else:
+                    dir1.setPathFile(name)
+
+            self.tvSourceCodeFiles.setData(saveTableDir)
         
         
         # fdialog = QFileDialog(self,                # Родитель
@@ -129,6 +136,9 @@ class dialogIshodDocx(QtWidgets.QDialog):
             где пользователь укажет место для сохранения файла.
             Returns: None
         """
+        NameDocx = self.ui.lineEdit_NameDocx.text()
+        NameFile = self.ui.lineEdit_NameFile.text()
+        
         ##!!!!!!! В стадии написания и отладки
         fileName_choose, filetype = QFileDialog.getSaveFileName(self,  
                             "Сохранение файла",  
@@ -138,6 +148,8 @@ class dialogIshodDocx(QtWidgets.QDialog):
         if fileName_choose == "":
             print("\ nОтменить выбор")
             return
+
+        # Сохранить 
 
         print("\ nФайл, который вы выбрали для сохранения:")
         print(fileName_choose)
