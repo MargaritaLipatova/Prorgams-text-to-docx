@@ -26,21 +26,25 @@ class Src2Docx():
         # проходимся по таблицам
         for i, table in enumerate(self.doc.tables):
             # проходимся по строкам таблицы `i`
-            print(table.style.font.size)
-            table.style.font.size = Pt(12)
+            #table.style.font.size = Pt(12)
             for j, row in enumerate(table.rows):
                 # проходимся по ячейкам таблицы `i` и строки `j`
                 for cell in row.cells:
                     # добавляем значение ячейки в соответствующий
                     # список, созданного словаря под данные таблиц
                     txt_val = cell.text
-                    txt_val = txt_val.replace(tmp_name_dec, name_num_dec)
-                    cell.text = txt_val
-
-            table.style.font.size = Pt(12)
-            #print(dir(table.style.element))
-            print("Pt", Pt(12))
-            
+                    if len(txt_val):
+                        txt_val = txt_val.replace(tmp_name_dec, name_num_dec)
+                        cell.text = txt_val
+                    
+                    paragraphs = cell.paragraphs
+                    
+                    for paragraph in paragraphs:
+                        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        for run in paragraph.runs:
+                            font = run.font
+                            font.size= Pt(12)
+             
         for para in self.doc.paragraphs:
             if para.text == tmp_name_doc:
                 para.text = name_doc
@@ -128,6 +132,7 @@ for i in files:
 
 koll = "ФПДА-00001"    
 docc.add_koll(koll)
+
 docc.save_docx(path_to_docx)
 
 
