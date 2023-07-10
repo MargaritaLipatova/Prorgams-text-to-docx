@@ -4,6 +4,7 @@ import os
 
 import docx
 from docx import Document
+from docx.shared import Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
@@ -81,7 +82,7 @@ class Src2Docx():
         p_fmt.space_after = Pt(0)
         p_fmt.first_line_indent = Cm(1.5)
 
-    def add_files(self, files):
+    def remote_blank_lines(self, files):
         for i in files:
             name_f = os.path.basename(i)
             f = open(i,'r', encoding="utf-8")#, errors='ignore')
@@ -101,7 +102,7 @@ class Src2Docx():
         header.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     def add_table_lri(self):
-        path_lri = "D:\\NMC5\\m.lipatova\\moskow\\Prorgams-text-to-docx\\template_lri.docx"
+        path_lri = "D:\\GitHub\\Prorgams-text-to-docx\\template_lri.docx"
         doc_lri = Document(path_lri)
 
         for table in doc_lri.tables:
@@ -119,7 +120,7 @@ class Src2Docx():
 
 def get_files(folder):
     extensions = ['cpp', 'h']
-    path_to_conf = "D:\\NMC5\\m.lipatova\\moskow\\Prorgams-text-to-docx\\.filesextension"
+    path_to_conf = "D:\\GitHub\\Prorgams-text-to-docx\\.filesextension"
 
     f = open(path_to_conf,'r', encoding="utf-8")
     extensions = f.read()
@@ -135,3 +136,4 @@ def get_files(folder):
                 if path.split('.')[-1] in extensions:
                     res.append(path)
     return res
+
