@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string notr="true">Исход-В</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icon/icon/Box with Papers@2x.png</normaloff>:/icon/icon/Box with Papers@2x.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -35,13 +39,23 @@
          <pointsize>12</pointsize>
         </font>
        </property>
+       <property name="toolTip">
+        <string/>
+       </property>
        <property name="text">
         <string>Название документа</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_NameFile"/>
+      <widget class="QLineEdit" name="lineEdit_NameFile">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Название документа...</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -60,7 +74,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_NameDocx"/>
+      <widget class="QLineEdit" name="lineEdit_NameDocx">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>ИТНЯ.*****.**-*</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -171,6 +192,9 @@
           <property name="text">
            <string>с учётом вложенных папок</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
@@ -193,7 +217,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Добавить файлы...</string>
+           <string>Добавить...</string>
           </property>
          </widget>
         </item>
@@ -249,7 +273,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="pBnt_PreviewDocx">
           <property name="minimumSize">
            <size>
             <width>172</width>

@@ -7,7 +7,7 @@ Created on Sun Oct 16 13:18:38 2022
 
 import sys
 from PyQt5 import QtWidgets
-from dialog_Ishod_w import dialogIshodDocx 
+from dialog_Ishod_w import dialogIshodDocx
 
 def start_main():
     app = QtWidgets.QApplication([])
@@ -18,7 +18,7 @@ def start_main():
     a = app.exec()
     print("Exit program 'ishod-w' ")
     sys.exit(a)
-    
+
 if __name__ == "__main__":
     start_main()
 

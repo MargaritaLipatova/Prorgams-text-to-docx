@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icon/Box with Papers@2x.png</file>
+    <file>icon/Box with Video Files@2x.png</file>
     <file>icon/folder_refresh_icon.ico</file>
     <file>icon/folder_refresh_outline_icon.ico</file>
   </qresource>
