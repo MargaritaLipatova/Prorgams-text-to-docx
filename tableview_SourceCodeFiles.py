@@ -12,6 +12,10 @@ from PyQt5.QtCore import * #Qt, QVariants#№, QString
 from common import *
 from dialog_ChangeExtensions import dialogChangeExtensions
 
+
+from PyQt5 import QtCore, QtGui, QtWidgets, uic#, QVariant, QString
+from PyQt5.QtCore import * #Qt, QVariants#№, QString
+from common import *
 #===============================================================================
 
 class cfgTableSourceCodeFiles(object):
@@ -157,6 +161,81 @@ class TableModel(QtCore.QAbstractTableModel):
                 elif section == 1:
                     return "Тип"
         return QVariant()
+#===============================================================================
+
+
+
+#===============================================================================
+
+
+class TableModel(QtCore.QAbstractTableModel):
+    def __init__(self, data, cfgTable):
+        super(TableModel, self).__init__()
+        self._dataSrc = data or set()
+        self.cfgTable = cfgTable
+        self.countRow = 0
+        self._intermediateTable = []
+
+    @property
+    def intermediateTable(self):
+        return self._intermediateTable
+
+    @intermediateTable.setter
+    def intermediateTable(self, data):
+        self._intermediateTable = data
+        self.countRow = len(data)
+
+    def updateCountRow(self):
+        self.countRow = len(self._intermediateTable)
+
+
+    @property
+    def dataSrc(self):
+        return self._dataSrc
+
+    @dataSrc.setter
+    def dataSrc(self, data):
+        self._dataSrc = data
+
+    def data(self, index, role):
+        if role == Qt.TextAlignmentRole:
+            if index.column() == self.cfgTable.idColumnEx():
+                return Qt.AlignCenter
+
+        if role == Qt.DisplayRole:
+            # See below for the nested-list data structure.
+            # .row() indexes into the outer list,
+            # .column() indexes into the sub-list
+
+            if index.column() == self.cfgTable.idColumnEx():
+                return self.intermediateTable[index.row()][2]
+
+            if index.column() == self.cfgTable.idColumnName():
+                return self.intermediateTable[index.row()][1]
+
+        if role == Qt.ToolTipRole:
+            if index.column() == self.cfgTable.idColumnName():
+                return self.intermediateTable[index.row()][3]
+
+
+    def rowCount(self, index):
+        # The length of the outer list.
+        return self.countRow
+
+    def columnCount(self, index):
+        # The following takes the first sub-list, and returns
+        # the length (only works if all rows are an equal length)
+        return self.cfgTable.countColumn()
+
+    def headerData(self, section:int, orientation:Qt.Orientation, role:int):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                if section == 0:
+                    return "Название"
+                elif section == 1:
+                    return "Тип"
+        return QVariant()
+
 #===============================================================================
 
 

@@ -206,7 +206,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="pBnt_PreviewDocx">
           <property name="minimumSize">
            <size>
             <width>172</width>
