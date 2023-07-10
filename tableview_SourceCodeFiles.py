@@ -4,16 +4,14 @@ Created on Sun Jan 15 14:39:51 2023
 
 @author: Vasilyeva
 """
-# from PyQt5 import QtWidgets
-# from PyQt5.QtCore import *
-# from PyQt5.QtWidgets import *
-# from PyQt5.QtGui import *
-# from PyQt5.QtWidgets import QTableView
+
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic#, QVariant, QString
-from PyQt5.QtCore import Qt, QVariant #№, QString
+from PyQt5.QtCore import * #Qt, QVariants#№, QString
 from common import *
+from dialog_ChangeExtensions import dialogChangeExtensions
+
 #===============================================================================
 
 class cfgTableSourceCodeFiles(object):
@@ -22,29 +20,21 @@ class cfgTableSourceCodeFiles(object):
     """
     def __init__(self):
         self._countColumn = 2
-#        self._idColumnCheck = 0
         self._idColumnName = 0
         self._idColumnEx = 1
         self._HHeaderLabels = ["Название", "Тип"]
-        # self._widthColumnCheck = 10
         self._widthColumnName = 450
         self._widthColumnEx = 100
-        
-    
+
+
     def countColumn(self):
         return self._countColumn
-    
-    # def idColumnCheck(self):
-    #     return self._idColumnCheck
-    
+
     def idColumnName(self):
         return self._idColumnName
-    
+
     def idColumnEx(self):
         return self._idColumnEx
-    
-    # def widthColumnCheck(self):
-    #     return self._widthColumnCheck
 
     def widthColumnName(self):
         return self._widthColumnName
@@ -65,50 +55,75 @@ class cfgTableSourceCodeFiles(object):
 #===============================================================================
 
 
+class TableFilterEx(QtCore.QSortFilterProxyModel):
+    def __init__(self):
+        super(TableFilterEx, self).__init__()
+        self._listEx = set()
+
+    def filterAcceptsRow(self, sourceRow: int, sourceParent: QModelIndex):
+        try:
+            index: QModelIndex = self.sourceModel().index(sourceRow, self.filterKeyColumn(), sourceParent)
+            textEx = self.sourceModel().data(index, role = Qt.DisplayRole)
+
+            if textEx in self._listEx:
+                # Строка видна
+                self.sourceModel().intermediateTable[sourceRow][0] = False
+                return True
+            else:
+                # Строка скрыта
+                self.sourceModel().intermediateTable[sourceRow][0] = True
+                # if not (self.sourceModel().data(index, role = Qt.DisplayRole) in filter): # Если какой-либо фильтр присутствует в строке
+                #     return True
+                #     # return self.sourceModel().data(index).toString().contains(filter)
+        except Exception as e:
+            print("EROOR = ", e)
+
+        return False
+
+    def setFilterEx(self, sEx):
+        self._listEx.add(sEx)
+
+    def removeFilterEx(self, sEx):
+        self._listEx.remove(sEx)
+
+    def removeAllFilterEx(self):
+        self._listEx.clear()
+
+
+#===============================================================================
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data, cfgTable):
         super(TableModel, self).__init__()
-        self._dataSrc = data or []
+        self._dataSrc = data or set()
         self.cfgTable = cfgTable
         self.countRow = 0
         self._intermediateTable = []
-        
+
     @property
     def intermediateTable(self):
         return self._intermediateTable
-    
+
     @intermediateTable.setter
     def intermediateTable(self, data):
         self._intermediateTable = data
         self.countRow = len(data)
-        
+
+    def updateCountRow(self):
+        self.countRow = len(self._intermediateTable)
+
     @property
     def dataSrc(self):
         return self._dataSrc
-    
+
     @dataSrc.setter
     def dataSrc(self, data):
-        self._dataSrc = data  
-    
-    # def setData(self, index, value, role=QtCore.Qt.EditRole):
-    #     # if role == QtCore.Qt.EditRole:
-    #     #     row = index.row()
-    #     #     column = index.column()
-    #     #     self.materials[row][column] = value
-    #     #     self.dataChanged.emit(index, index, (role,))
-    #     #     return True
-    #     if role == QtCore.Qt.CheckStateRole:
-    #         #self.check_states[QtCore.QPersistentModelIndex(index)] = value
-    #         self.dataChanged.emit(index, index, (role,))
-    #         return True
-    #     return False
-    
+        self._dataSrc = data
+
     def data(self, index, role):
         if role == Qt.TextAlignmentRole:
             if index.column() == self.cfgTable.idColumnEx():
                 return Qt.AlignCenter
-            
-            
+
         if role == Qt.DisplayRole:
             # See below for the nested-list data structure.
             # .row() indexes into the outer list,
@@ -116,30 +131,24 @@ class TableModel(QtCore.QAbstractTableModel):
 
             if index.column() == self.cfgTable.idColumnEx():
                 return self.intermediateTable[index.row()][2]
-            
+
             if index.column() == self.cfgTable.idColumnName():
                 return self.intermediateTable[index.row()][1]
 
-        # if role == QtCore.Qt.CheckStateRole:
-        #     if index.column() == self.cfgTable.idColumnCheck():
-        #         value = self.intermediateTable[index.row()][0] #self.check_states.get(QtCore.QPersistentModelIndex(index))
-        #         if value is not None:
-        #             return value
-            
+        if role == Qt.ToolTipRole:
+            if index.column() == self.cfgTable.idColumnName():
+                return self.intermediateTable[index.row()][3]
+
 
     def rowCount(self, index):
         # The length of the outer list.
-        # countRow = 0
-        # for dt in self.dataSrc: 
-        #     countRow += 1
-        #     countRow += len(dt.pathFiles)
         return self.countRow
 
     def columnCount(self, index):
         # The following takes the first sub-list, and returns
         # the length (only works if all rows are an equal length)
         return self.cfgTable.countColumn()
-    
+
     def headerData(self, section:int, orientation:Qt.Orientation, role:int):
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
@@ -148,26 +157,11 @@ class TableModel(QtCore.QAbstractTableModel):
                 elif section == 1:
                     return "Тип"
         return QVariant()
-    
-#     def flags(self, index):
-#         if index.column() == self.cfgTable.idColumnCheck():
-#             return (QtCore.Qt.ItemIsEditable  | QtCore.Qt.ItemIsEnabled| 
-#                     QtCore.Qt.ItemIsSelectable| QtCore.Qt.ItemIsUserCheckable)
+#===============================================================================
 
-# =============================================================================
-# 
-# class CustomDelegate(QtWidgets.QStyledItemDelegate):
-#     def initStyleOption(self, option, index):
-#         if index.column() == 0:#self.cfgTable.idColumnCheck():
-#             value = index.data(QtCore.Qt.CheckStateRole)
-#             if value is None:
-#                 model = index.model()
-#                 model.setData(index, QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
-#             super().initStyleOption(option, index)
-#             option.direction = QtCore.Qt.RightToLeft
-#             option.displayAlignment = QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
 
-# =============================================================================
+
+#===============================================================================
 
 class TableSourceCodeFiles(QTableView):
     """
@@ -178,207 +172,211 @@ class TableSourceCodeFiles(QTableView):
         super(TableSourceCodeFiles, self).__init__(parent)
         self.cfgTable = cfgTableSourceCodeFiles()
         self.model = TableModel([],self.cfgTable)
-        # self.model.setHorizontalHeaderLabels(self.cfgTable.HHeaderLabels())  # Названия 4 колонок (Расширение или Тип)
-        # self.model.setColumnCount(self.cfgTable.countColumn())
-        self.setModel(self.model)
-        # delegate = CustomDelegate(self)
-        # self.setItemDelegateForColumn(self.cfgTable.idColumnCheck(), delegate)
+        # self.setModel(self.model)
 
-        #self.tv_model = QStandardItemModel(self)                                # Модель представления данных в таблице
-        #self.model.setColumnCount(self.cfgTable.countColumn())               # В моделе устанавливаем 3 колонки
-        #self.model.setHorizontalHeaderLabels(self.cfgTable.HHeaderLabels())  # Названия 4 колонок (Расширение или Тип)
-        #self.setModel(self.tv_model)                                            # Установка модели представления в таблицу
-        # self.setColumnWidth(self.cfgTable.idColumnCheck(), self.cfgTable.widthColumnCheck())
+        self.tableFilterEx = TableFilterEx()
+        self.tableFilterEx.setDynamicSortFilter(True)
+        self.tableFilterEx.setFilterKeyColumn(self.cfgTable.idColumnEx())
+        self.tableFilterEx.setSourceModel(self.model)
+        self.setModel(self.tableFilterEx)
+
         self.setColumnWidth(self.cfgTable.idColumnName(),  self.cfgTable.widthColumnName())
         self.setColumnWidth(self.cfgTable.idColumnEx(),    self.cfgTable.widthColumnEx())
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.horizontalHeader().setStretchLastSection(True)                    # Растягивание последнего столбца, если изменился размер таблицы
+        # self.horizontalHeader().setStretchLastSection(True)                    # Растягивание последнего столбца, если изменился размер таблицы
+        self.horizontalHeader().setSectionResizeMode(self.cfgTable.idColumnName(), QHeaderView.Stretch)
+        self.horizontalHeader().setSectionResizeMode(self.cfgTable.idColumnEx(), QHeaderView.Interactive)
         self.horizontalHeader().setStyleSheet(self.cfgTable.HHeaderSheetStyle())
         self.setSelectionBehavior(self.SelectRows)
         self.setSelectionMode(self.SingleSelection)
+        self.verticalHeader().setVisible(False)
+
+        self.listEx = []        # список расширений
+        indexClmEx = self.horizontalHeader().sectionPosition(self.cfgTable.idColumnEx())
+        self.filter_pBtn = QPushButton(self.horizontalHeader())
+        self.filter_pBtn.move(indexClmEx,0)
+
+        # self.icon_filter_noAction = QtGui.QIcon()
+        # self.icon_filter_noAction.addPixmap(QtGui.QPixmap(":/icon/icon/filter_no_action.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+        pix_a = QtGui.QPixmap(":/icon/icon/filter_no_action.png")
+        self.icon_filter_noAction = QtGui.QIcon(pix_a)
+
+        pix_a = QtGui.QPixmap(":/icon/icon/filter_action.png")
+        self.icon_filter_Action = QtGui.QIcon(pix_a)
+
+        self.filter_pBtn.setIcon(self.icon_filter_noAction)
+
+        print(self.icon_filter_Action)
+        print(self.icon_filter_noAction)
+        print(self.filter_pBtn.icon())
 
 
-       
-        self._pathsList: list = []                                             # Список путей к папкам и файлам в таблице
-        self._pathsDir:  list = []                                             # Список путей к папкам и файлам в таблице
-        self._tableDir:  list = []
-        self._countRow = 0
+        self.filter_pBtn.setIconSize(QSize(15, 21))
+        self.filter_pBtn.show()
+        self.filter_pBtn.clicked.connect(self.btnClicked_filterEx)
 
-    def setPathsList(self, pathsList:list):
-        """Добавляет список путей к папкам и файлам
-        Args:
-            pathsList (list): список путей к папкам и файлам
-        """
-        self._pathsList.append(pathsList)
-    
-    def getPathsList(self, pathsList:list)->list:
-        """Возвращает список путей к папкам и файлам
+        self.horizontalHeader().sectionResized.connect(self.filter_pBtn_HHeaderSectionResized)
+        # self.horizontalHeader().horizontalScrollBar().connect(self.filter_pBtn_HHeaderScrollBar)
+        # connect(ui->tableWidget->horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(invalidateAlignedLayout()));
+
+        # Контекстное меню
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.ctxMenu)
+        self.createContextMenu()
+
+        # окно фильтра
+        self.dlgFilterEx = dialogChangeExtensions(self)
+
+
+    def filter_pBtn_HHeaderSectionResized(self, logicalIndex, oldSize, newSize):
+        if (logicalIndex + 1) == self.cfgTable.idColumnEx():
+            self.filter_pBtn.move(newSize +                                               # newSize
+                                  self.horizontalHeader().sectionSize(logicalIndex + 1) - # widthColumnEx
+                                  self.filter_pBtn.width(), 0)          # widthBtn # position(x, y)
+
+    def btnClicked_filterEx(self):
+        if self.dlgFilterEx.is_filter:
+            self.filter_pBtn.setIcon(self.icon_filter_noAction)
+            self.dlgFilterEx.is_filter = False
+        else:
+            self.filter_pBtn.setIcon(self.icon_filter_Action)
+            self.dlgFilterEx.is_filter = True
+
+    # def filter_pBtn_HHeaderScrollBar(self, ):
+    #     ...
+
+    def getAllListTable(self)->list:
+        """Возвращает весь список (path)
         Return:
-            pathsList (list): список путей к папкам и файлам
+            pathsList (list): список путей к файлам
         """
-        return self._pathsList
-    
-    def getPathsDir(self)->list:
-      """Возвращает список папок(path)
-      Return:
-          pathsList (list): список путей к папкам и файлам
-      """
-      listDir = []
-      for idir in self._tableDir:
-          listDir.append(idir.pathDir)
-      return listDir
-  
-    def getTableDir(self)->list:
-      """Возвращает список папок(path)
-      Return:
-          pathsList (list): список путей к папкам и файлам
-      """
-      return self._tableDir
-  
+        return self.model.dataSrc
 
-    def setData(self, data: list)->None:
+    def getDocxListTable(self)->list:
+        """Возвращает список путей к файлам для создания документа
+        Return:
+         pathsList (list): список путей к файлам
+        """
+        listDocx = []
+        for fileRow in self.model.intermediateTable:
+
+            if fileRow[0] != True:
+                listDocx.append(fileRow[3])
+        return listDocx
+
+
+    def __getIntermediateModel(self, data: set):
+        self.listEx = []
+        intermediateTable = []
+        for path in data:
+            basename  = os.path.splitext(path)
+            file_name = os.path.basename(basename[0])
+            ex = basename[-1] #str(os.path.basename(name).suffix) #str(basename.split(basename.split('.')[0])[-1])
+            intermediateTable.append(   [False,       # statehiddenfilters
+                                        file_name,    # basename.split('.')[0], # name file
+                                        ex,           # ex
+                                        path          # path
+                                        ])
+
+            if not ex in self.listEx:
+                self.listEx.append(ex)
+                self.tableFilterEx.setFilterEx(ex)
+
+        return intermediateTable
+
+    def setInfoModel(self, data: set)->None:
         # -----------------------------------
         # Промежуточный вид модели для отображения в таблице
         # -----------------------------------
-        intermediateTable = []
-        for dirdata in data:
-            # папка
-            intermediateTable.append([dirdata.checkboxDir, dirdata.pathDir, "Folder"])
-            # файлы
-            for pathFile in dirdata.pathFiles:
-                for name, checkState in pathFile.items():
-                    intermediateTable.append(    [checkState, 
-                                                  name.split('.')[0].split('/')[-1], 
-                                                  name.split('.')[1]
-                                                 ])
+        intermediateTable = self.__getIntermediateModel(data)
+        # -----------------------------------
+        self.setActionEx()
         # -----------------------------------
         self.model.intermediateTable = intermediateTable
         self.model.dataSrc = data
         self.model.layoutChanged.emit()
-         
+        # self.model..emit()
+
+    def setActionEx(self):
+        """
+            Очищение и добавление расширений в меню "Удалить файлы по расширению"
+        """
+        self.menuDeleteFilesEx.clear()# Удаление всех расширений
+        for ex in self.listEx:
+            actEx = QAction(ex, self)
+            actEx.triggered.connect(self.deleteFilesEx)
+            self.menuDeleteFilesEx.addAction(actEx)
+
+    def ctxMenu(self, pos):
+        # -----------------------------------
+        # Обработка сигнала вызова контекстного меню по нажатию правой кнопки мыши
+        # -----------------------------------
+        self.actionDeleteFile.setEnabled( False if len(self.model.dataSrc) == 0 else True)
+        self.menuDeleteFilesEx.setEnabled(False if len(self.model.dataSrc) == 0 else True)
+        self.qMenuTable.exec(self.mapToGlobal(pos))
+
+    def deleteFile(self):
+        try:
+            selrow = self.selectionModel().currentIndex().row()
+            print("selection", selrow,
+                ", text ", self.model.intermediateTable[selrow][1],
+                ", ex ", self.model.intermediateTable[selrow][2])
+
+            self.model.dataSrc.remove(self.model.intermediateTable[selrow][3])
+            self.model.intermediateTable.remove(self.model.intermediateTable[selrow])
+
+            # Обновление строк в таблице
+            self.model.updateCountRow()
+            self.model.layoutChanged.emit()
+
+            # !!!!!!!!!
+            # проверка не был ли этот файл единственным с таким расширением
+            # !!!!!!!!!
+        except Exception as e:
+            print("EROOR = ", e)
+
+    def deleteFilesEx(self):
+        try:
+            pObj = self.sender()
+            nameEx =  pObj.text()
+            print("deleteFilesEx", nameEx)
+
+            # Удаление из промежуточной таблицы, то что отображается в таблице
+            for x in reversed(range(len(self.model.intermediateTable))):
+                if self.model.intermediateTable[x][2] == nameEx:
+                    self.model.intermediateTable.remove(self.model.intermediateTable[x])
+
+            # Удаление из модели
+            for x in reversed(range(len(self.model.dataSrc))):
+                if os.path.splitext(list(self.model.dataSrc)[x])[-1] == nameEx:
+                    self.model.dataSrc.remove(list(self.model.dataSrc)[x])
+
+            # Обновление строк в таблице
+            self.model.updateCountRow()
+            self.tableFilterEx.removeFilterEx(nameEx)
+            self.listEx.remove(nameEx)
+
+            self.menuDeleteFilesEx.removeAction(pObj)
+
+            if self.menuDeleteFilesEx.isEmpty():
+                self.menuDeleteFilesEx.setDisabled(True)
+
+            self.model.layoutChanged.emit()
+
+        except Exception as e:
+            print("EROOR = ", e)
 
 
+    def createContextMenu(self):
+        self.actionDeleteFile = QAction("Удалить", self)
+        # self.actionDeleteFile.setStatusTip("Create a new file")
+        self.actionDeleteFile.triggered.connect(self.deleteFile)
+        self.actionDeleteFile.setEnabled(False)
 
-            
-# =============================================================================
-#     def __init__(self, parent=None):
-#         super(TableSourceCodeFiles, self).__init__(parent)
-#         #super(TableSourceCodeFiles, self).__init__()
-#         #self.setParent(parent)
-#         self.cfgTable = cfgTableSourceCodeFiles()
-#         self.tv_model = QStandardItemModel(self)                                # Модель представления данных в таблице
-#         self.tv_model.setColumnCount(self.cfgTable.countColumn())               # В моделе устанавливаем 3 колонки
-#         self.tv_model.setHorizontalHeaderLabels(self.cfgTable.HHeaderLabels())  # Названия 4 колонок (Расширение или Тип)
-#         self.setModel(self.tv_model)                                            # Установка модели представления в таблицу
-#         self.setColumnWidth(self.cfgTable.idColumnCheck(), self.cfgTable.widthColumnCheck())
-#         self.setColumnWidth(self.cfgTable.idColumnName(),  self.cfgTable.widthColumnName())
-#         self.setColumnWidth(self.cfgTable.idColumnEx(),    self.cfgTable.widthColumnEx())
-#         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
-#         self.horizontalHeader().setStretchLastSection(True)                    # Растягивание последнего столбца, если изменился размер таблицы
-#         
-#         self._pathsList: list = []                                             # Список путей к папкам и файлам в таблице
-#         self._pathsDir:  list = []                                             # Список путей к папкам и файлам в таблице
-#         self._tableDir:  list = []
-#         self._countRow = 0
-#     def setPathsList(self, pathsList:list):
-#         """Добавляет список путей к папкам и файлам
-#         Args:
-#             pathsList (list): список путей к папкам и файлам
-#         """
-#         self._pathsList.append(pathsList)
-#     
-#     def getPathsList(self, pathsList:list)->list:
-#         """Возвращает список путей к папкам и файлам
-#         Return:
-#             pathsList (list): список путей к папкам и файлам
-#         """
-#         return self._pathsList
-#     
-#     def getPathsDir(self)->list:
-#       """Возвращает список папок(path)
-#       Return:
-#           pathsList (list): список путей к папкам и файлам
-#       """
-#       listDir = []
-#       for idir in self._tableDir:
-#           listDir.append(idir.pathDir)
-#       return listDir
-#   
-#     def getTableDir(self)->list:
-#       """Возвращает список папок(path)
-#       Return:
-#           pathsList (list): список путей к папкам и файлам
-#       """
-#       return self._tableDir
-#   
-#     
-#     def setRow(self, name: str, row, col):
-#         item_ = self.tv_model.item(row, self.cfgTable.idColumnName());
-#         item_.setText(name)
-#         
-#     def setFolder(self, data: tableDir):
-#         print("1")
-#         self.setRow(data.pathDir, self._countRow, self.cfgTable.idColumnName())
-#         self._countRow += 1
-# 
-#         for name in data.pathFiles:
-#             self.setRow(name.split('/')[-1].split('.')[0], self._countRow, self.cfgTable.idColumnName())
-#             self.setRow(name.split('/')[-1].split('.')[-1], self._countRow, self.cfgTable.idColumnEx())
-#             self._countRow += 1
-#   
-#         #lst.append(item);
-#         #self.tv_model.appendRow(lst);
-#     
-#     def setData(self, data: list)->None:
-#         # Количество строк для таблицы
-#         countRow = 0
-#         
-#         for dt in data: 
-#             countRow += 1
-#             countRow += len(dt.pathFiles)
-#         
-#         # Выделяем сразу строки в таблицу
-#         self.tv_model.setRowCount(countRow)
-#         
-#         # Запись папки 
-#         self._countRow = 0
-#         for tdir in data:
-#             self.setFolder(tdir)
-#             
-#         
-#             
-#         
-#         # for i in range(0, self.cfgTable.countColumn()):
-#         #     item = QStandardItem(row, i);
-#         #     item.setText();
-#         #     lst.append(item);
-# 
-#         # self.tv_model.appendRow(lst);
-#         #self.setModel(model);
-# # =============================================================================
-# #         for(int row = 0;row<5;row++)
-# #         {
-# #             QList<QStandardItem*> lst;
-# #             for(int column = 0;column<1;column++)
-# #             {
-# #                 QStandardItem* item = new QStandardItem(row,column);
-# #                 item->setText("Бла бла бла");
-# #                 lst<<item;
-# #             }
-# #             model->appendRow(lst);
-# #         }
-# #         this->setModel(model);
-# # =============================================================================
-#         
-#         return
-#     
-#     
-#     
-#         
-# 
-# 
-# 
-# 
-# 
-# 
-# =============================================================================
+        self.menuDeleteFilesEx = QMenu("Удалить файлы по расширению", self)
+        self.menuDeleteFilesEx.setEnabled(False)
+
+        self.qMenuTable = QMenu(self)
+        self.qMenuTable.addAction(self.actionDeleteFile)
+        self.qMenuTable.addMenu(self.menuDeleteFilesEx)
