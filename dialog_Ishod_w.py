@@ -47,18 +47,8 @@ class dialogIshodDocx(QtWidgets.QDialog):
         self.tvSourceCodeFiles = TableSourceCodeFiles(self)
         self.formlayout.addRow(self.tvSourceCodeFiles)
 
-        # Виджет с информацией о расширениях
-        self.ui.wStatusExtensions.setVisible(False)  # скрыть информацию
-        self.ui.pBtn_ChangeEx.setEnabled(False)      # неактивная кнопка ,т.к. пуста таблица "Файлы исходных кодов"
-
         # Виджет с информацией о расположение сохранненого файла по кнопки "Создать документ..."
         self.ui.wStatusPathSavingDocx.setVisible(False) # скрыть информацию
-
-        # Кнопка "Обновить таблицу"
-        self.ui.pBtn_UpdateTable.setToolTip("Обновить") # подсказака, текст появляется при наведение стрелки мыши
-
-        # Кнопка "Изменить расширения..."
-        self.ui.pBtn_ChangeEx.clicked.connect(self.btnClicked_ChangeEx)
 
         # Кнопка "Добавить файлы..."
         self.ui.pBtn_AddFilesInFolder.clicked.connect(self.btnClicked_AddFilesInFolder)
