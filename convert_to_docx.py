@@ -28,7 +28,6 @@ class Src2Docx():
         # проходимся по таблицам
         for i, table in enumerate(self.doc.tables):
             # проходимся по строкам таблицы `i`
-            #table.style.font.size = Pt(12)
             for j, row in enumerate(table.rows):
                 # проходимся по ячейкам таблицы `i` и строки `j`
                 for cell in row.cells:
@@ -53,7 +52,7 @@ class Src2Docx():
                 txt_val = para.text
                 txt_val = txt_val.replace(tmp_name_dec, name_num_dec)
                 para.text = txt_val
-                
+
     def add_heading(self, file_bn):
         style = self.doc.styles['Heading 1']
         style.font.name = 'Times New Roman'
@@ -82,7 +81,7 @@ class Src2Docx():
         p_fmt.space_after = Pt(0)
         p_fmt.first_line_indent = Cm(1.5)
 
-    def remote_blank_lines(self, files):
+    def add_files(self, files):
         for i in files:
             name_f = os.path.basename(i)
             f = open(i,'r', encoding="utf-8")#, errors='ignore')
@@ -102,7 +101,7 @@ class Src2Docx():
         header.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     def add_table_lri(self):
-        path_lri = "D:\\GitHub\\Prorgams-text-to-docx\\template_lri.docx"
+        path_lri = ".\\auxiliary\\template_lri.docx"
         doc_lri = Document(path_lri)
 
         for table in doc_lri.tables:
@@ -113,27 +112,5 @@ class Src2Docx():
                 p.getparent().remove(p)
                 p._p = p._element = None
 
-
-
     def save_docx(self, path):
         self.doc.save(path)
-
-def get_files(folder):
-    extensions = ['cpp', 'h']
-    path_to_conf = "D:\\GitHub\\Prorgams-text-to-docx\\.filesextension"
-
-    f = open(path_to_conf,'r', encoding="utf-8")
-    extensions = f.read()
-    f.close()
-    extensions = extensions.split("\n")
-    res = []
-    for root, dirs, files in os.walk(folder, topdown=False):
-        if "ref" in root.split("\\")[-1]:
-            pass
-        else:
-            for name in files:
-                path = os.path.join(root, name)
-                if path.split('.')[-1] in extensions:
-                    res.append(path)
-    return res
-

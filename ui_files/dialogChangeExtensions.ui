@@ -14,27 +14,26 @@
    <string>Изменить расширения...</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QListWidget" name="listWidget_Extensions">
      <item>
       <property name="text">
-       <string>.cpp</string>
-      </property>
-      <property name="checkState">
-       <enum>Checked</enum>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>.h</string>
-      </property>
-      <property name="checkState">
-       <enum>Checked</enum>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>.hpp</string>
+       <string>(Выделить всё)</string>
       </property>
       <property name="checkState">
        <enum>Checked</enum>
@@ -44,6 +43,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -58,14 +60,14 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_Ok">
+      <widget class="QPushButton" name="pBtn_Ok">
        <property name="text">
         <string>ОК</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_Cancel">
+      <widget class="QPushButton" name="pBtn_Cancel">
        <property name="text">
         <string>Отмена</string>
        </property>
