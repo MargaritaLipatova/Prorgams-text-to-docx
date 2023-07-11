@@ -7,15 +7,13 @@ Created on Sun Jan 15 14:39:51 2023
 
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic#, QVariant, QString
-from PyQt5.QtCore import * #Qt, QVariants#№, QString
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtCore import *
+
 from common import *
 from dialog_ChangeExtensions import dialogChangeExtensions
+from table_filter import *
 
-
-from PyQt5 import QtCore, QtGui, QtWidgets, uic#, QVariant, QString
-from PyQt5.QtCore import * #Qt, QVariants#№, QString
-from common import *
 #===============================================================================
 
 class cfgTableSourceCodeFiles(object):
@@ -58,40 +56,6 @@ class cfgTableSourceCodeFiles(object):
                 }"
 #===============================================================================
 
-
-class TableFilterEx(QtCore.QSortFilterProxyModel):
-    def __init__(self):
-        super(TableFilterEx, self).__init__()
-        self._listEx = set()
-
-    def filterAcceptsRow(self, sourceRow: int, sourceParent: QModelIndex):
-        try:
-            index: QModelIndex = self.sourceModel().index(sourceRow, self.filterKeyColumn(), sourceParent)
-            textEx = self.sourceModel().data(index, role = Qt.DisplayRole)
-
-            if textEx in self._listEx:
-                # Строка видна
-                self.sourceModel().intermediateTable[sourceRow][0] = False
-                return True
-            else:
-                # Строка скрыта
-                self.sourceModel().intermediateTable[sourceRow][0] = True
-                # if not (self.sourceModel().data(index, role = Qt.DisplayRole) in filter): # Если какой-либо фильтр присутствует в строке
-                #     return True
-                #     # return self.sourceModel().data(index).toString().contains(filter)
-        except Exception as e:
-            print("EROOR = ", e)
-
-        return False
-
-    def setFilterEx(self, sEx):
-        self._listEx.add(sEx)
-
-    def removeFilterEx(self, sEx):
-        self._listEx.remove(sEx)
-
-    def removeAllFilterEx(self):
-        self._listEx.clear()
 
 
 #===============================================================================
@@ -166,8 +130,6 @@ class TableModel(QtCore.QAbstractTableModel):
 
 
 #===============================================================================
-
-
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data, cfgTable):
         super(TableModel, self).__init__()
@@ -249,12 +211,12 @@ class TableSourceCodeFiles(QTableView):
     """
     def __init__(self, parent=None):
         super(TableSourceCodeFiles, self).__init__(parent)
+
         self.cfgTable = cfgTableSourceCodeFiles()
-        self.model = TableModel([],self.cfgTable)
-        # self.setModel(self.model)
+        self.model    = TableModel([],self.cfgTable)
 
         self.tableFilterEx = TableFilterEx()
-        self.tableFilterEx.setDynamicSortFilter(True)
+        # self.tableFilterEx.setDynamicSortFilter(True)
         self.tableFilterEx.setFilterKeyColumn(self.cfgTable.idColumnEx())
         self.tableFilterEx.setSourceModel(self.model)
         self.setModel(self.tableFilterEx)
@@ -270,60 +232,62 @@ class TableSourceCodeFiles(QTableView):
         self.setSelectionMode(self.SingleSelection)
         self.verticalHeader().setVisible(False)
 
-        self.listEx = []        # список расширений
-        indexClmEx = self.horizontalHeader().sectionPosition(self.cfgTable.idColumnEx())
-        self.filter_pBtn = QPushButton(self.horizontalHeader())
-        self.filter_pBtn.move(indexClmEx,0)
+        self.listEx = []        # список расширений для колонки "Тип"
 
-        # self.icon_filter_noAction = QtGui.QIcon()
-        # self.icon_filter_noAction.addPixmap(QtGui.QPixmap(":/icon/icon/filter_no_action.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-
-        pix_a = QtGui.QPixmap(":/icon/icon/filter_no_action.png")
-        self.icon_filter_noAction = QtGui.QIcon(pix_a)
-
-        pix_a = QtGui.QPixmap(":/icon/icon/filter_action.png")
-        self.icon_filter_Action = QtGui.QIcon(pix_a)
+        # Фильтр на колонку "Тип"
+        self.filter_pBtn          = QPushButton(self.horizontalHeader())
+        self.icon_filter_noAction = QtGui.QIcon(QtGui.QPixmap(":/icon/icon/filter_no_action.png"))
+        self.icon_filter_Action   = QtGui.QIcon(QtGui.QPixmap(":/icon/icon/filter_action.png"))
 
         self.filter_pBtn.setIcon(self.icon_filter_noAction)
-
-        print(self.icon_filter_Action)
-        print(self.icon_filter_noAction)
-        print(self.filter_pBtn.icon())
-
-
         self.filter_pBtn.setIconSize(QSize(15, 21))
         self.filter_pBtn.show()
+        self.filter_pBtn.setStyleSheet("QPushButton{ \
+                    background-color: #c1e1de;\
+                    color: black;\
+                    border: 1px solid #6c6c6c;\
+                }")
         self.filter_pBtn.clicked.connect(self.btnClicked_filterEx)
+
+        # окно фильтра
+        self.dlgFilterEx = dialogChangeExtensions(self)
 
         self.horizontalHeader().sectionResized.connect(self.filter_pBtn_HHeaderSectionResized)
         # self.horizontalHeader().horizontalScrollBar().connect(self.filter_pBtn_HHeaderScrollBar)
-        # connect(ui->tableWidget->horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(invalidateAlignedLayout()));
 
         # Контекстное меню
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.ctxMenu)
         self.createContextMenu()
 
-        # окно фильтра
-        self.dlgFilterEx = dialogChangeExtensions(self)
-
-
     def filter_pBtn_HHeaderSectionResized(self, logicalIndex, oldSize, newSize):
         if (logicalIndex + 1) == self.cfgTable.idColumnEx():
             self.filter_pBtn.move(newSize +                                               # newSize
                                   self.horizontalHeader().sectionSize(logicalIndex + 1) - # widthColumnEx
-                                  self.filter_pBtn.width(), 0)          # widthBtn # position(x, y)
+                                  self.filter_pBtn.width(), 0)                            # widthBtn # position(x, y)
+
+
+    def changeIconFilter(self):
+        self.filter_pBtn.setIcon(self.icon_filter_Action if self.dlgFilterEx.is_filter else self.icon_filter_noAction)
+        # if self.dlgFilterEx.is_filter:
+        #     self.filter_pBtn.setIcon(self.icon_filter_noAction)
+        #     self.dlgFilterEx.is_filter = False
+        # else:
+        #     self.filter_pBtn.setIcon(self.icon_filter_Action)
+        #     self.dlgFilterEx.is_filter = True
 
     def btnClicked_filterEx(self):
-        if self.dlgFilterEx.is_filter:
-            self.filter_pBtn.setIcon(self.icon_filter_noAction)
-            self.dlgFilterEx.is_filter = False
-        else:
-            self.filter_pBtn.setIcon(self.icon_filter_Action)
-            self.dlgFilterEx.is_filter = True
+        pointBtn = self.filter_pBtn.mapToGlobal(QPoint(0,0))
+        self.dlgFilterEx.move(pointBtn.x() +
+                              self.filter_pBtn.geometry().width() -
+                              self.dlgFilterEx.geometry().width(),
+                              pointBtn.y() + self.filter_pBtn.height())
 
-    # def filter_pBtn_HHeaderScrollBar(self, ):
-    #     ...
+        if self.dlgFilterEx.exec() == QDialog.Accepted:
+            print("OK exit dlgFilterEx")
+        else:
+            print("Cancel exit dlgFilterEx")
+        self.changeIconFilter()
 
     def getAllListTable(self)->list:
         """Возвращает весь список (path)
@@ -371,17 +335,21 @@ class TableSourceCodeFiles(QTableView):
         intermediateTable = self.__getIntermediateModel(data)
         # -----------------------------------
         self.setActionEx()
+        self.setTableFilterEx()
         # -----------------------------------
         self.model.intermediateTable = intermediateTable
         self.model.dataSrc = data
         self.model.layoutChanged.emit()
-        # self.model..emit()
+
+    def setTableFilterEx(self):
+        self.dlgFilterEx.setFilters(self.listEx)
+        # self.dlgFilterEx.removeFilter(self.listEx[0])
 
     def setActionEx(self):
         """
             Очищение и добавление расширений в меню "Удалить файлы по расширению"
         """
-        self.menuDeleteFilesEx.clear()# Удаление всех расширений
+        self.menuDeleteFilesEx.clear()
         for ex in self.listEx:
             actEx = QAction(ex, self)
             actEx.triggered.connect(self.deleteFilesEx)
@@ -402,12 +370,14 @@ class TableSourceCodeFiles(QTableView):
                 ", text ", self.model.intermediateTable[selrow][1],
                 ", ex ", self.model.intermediateTable[selrow][2])
 
+            self.blockSignals(True)
             self.model.dataSrc.remove(self.model.intermediateTable[selrow][3])
             self.model.intermediateTable.remove(self.model.intermediateTable[selrow])
+            self.blockSignals(False)
 
             # Обновление строк в таблице
             self.model.updateCountRow()
-            self.model.layoutChanged.emit()
+            # self.model.layoutChanged.emit()
 
             # !!!!!!!!!
             # проверка не был ли этот файл единственным с таким расширением
@@ -441,7 +411,7 @@ class TableSourceCodeFiles(QTableView):
             if self.menuDeleteFilesEx.isEmpty():
                 self.menuDeleteFilesEx.setDisabled(True)
 
-            self.model.layoutChanged.emit()
+            # self.model.layoutChanged.emit()
 
         except Exception as e:
             print("EROOR = ", e)
@@ -454,6 +424,7 @@ class TableSourceCodeFiles(QTableView):
         self.actionDeleteFile.setEnabled(False)
 
         self.menuDeleteFilesEx = QMenu("Удалить файлы по расширению", self)
+        # self.menuDeleteFilesEx.triggered.connect(self.deleteFilesEx)
         self.menuDeleteFilesEx.setEnabled(False)
 
         self.qMenuTable = QMenu(self)
