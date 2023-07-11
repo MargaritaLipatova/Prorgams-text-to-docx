@@ -41,6 +41,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
         self.setWindowTitle("Исход-В v.1.0")  # Название программы с версией
         self.cwd = os.getcwd()                # Получить текущее местоположение файла программы
 
+        self.setWindowFlags(Qt.Window)        # Смена кнопок в диалговом окне вправом вехнем углу
         # Таблица "Файлы исходных кодов"
         self.formlayout = QFormLayout()
         self.ui.widget_SourceCodeFiles.setLayout(self.formlayout)
