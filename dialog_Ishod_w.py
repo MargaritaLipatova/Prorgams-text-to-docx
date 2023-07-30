@@ -17,63 +17,69 @@ from common import *
 from convert_to_docx import Src2Docx
 from tableview_SourceCodeFiles import TableSourceCodeFiles
 from ui_files.ui_ishod_w import Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
-
+import loggers
 
 class dialogIshodDocx(QtWidgets.QDialog):
     """ Главное диалоговое окно 'Исход-В'
     """
     def __init__(self, parent=None):
         super(dialogIshodDocx, self).__init__()
-        self.ui = Ui_DialogIshodDocx()        # Инициализация ui-интерфейсов
-        self.ui.setupUi(self)                 # Установка ui-интерфейсов
-        self.setWindowTitle("Исход-В v.1.0")  # Название программы с версией
-        self.cwd = os.getcwd()                # Получить текущее местоположение файла программы
-        self.setWindowFlags(Qt.Window)        # Смена кнопок в диалговом окне вправом вехнем углу
 
-        # Таблица "Файлы исходных кодов"
-        self.formlayout = QFormLayout()
-        self.ui.widget_SourceCodeFiles.setLayout(self.formlayout)
-        self.tvSourceCodeFiles = TableSourceCodeFiles(self)
-        self.formlayout.addRow(self.tvSourceCodeFiles)
+        try:
+            self.loggers = loggers.get_logger(dialogIshodDocx.__name__)
+            self.loggers.info('start')
+            self.ui = Ui_DialogIshodDocx()        # Инициализация ui-интерфейсов
+            self.ui.setupUi(self)                 # Установка ui-интерфейсов
+            self.setWindowTitle("Исход-В v.1.0")  # Название программы с версией
+            self.cwd = os.getcwd()                # Получить текущее местоположение файла программы
+            self.setWindowFlags(Qt.Window)        # Смена кнопок в диалговом окне вправом вехнем углу
 
-        # Виджет с информацией о расположение сохранненого файла по кнопки "Создать документ..."
-        self.ui.wStatusPathSavingDocx.setVisible(False) # скрыть информацию
+            # Таблица "Файлы исходных кодов"
+            self.formlayout = QFormLayout()
+            self.ui.widget_SourceCodeFiles.setLayout(self.formlayout)
+            self.tvSourceCodeFiles = TableSourceCodeFiles(self)
+            self.formlayout.addRow(self.tvSourceCodeFiles)
 
-        # Кнопка "Добавить..."
-        self.ui.pBtn_AddFilesInFolder.clicked.connect(self.btnClicked_AddFilesInFolder)
+            # Виджет с информацией о расположение сохранненого файла по кнопки "Создать документ..."
+            self.ui.wStatusPathSavingDocx.setVisible(False) # скрыть информацию
 
-        # Кнопка "Создать документ..."
-        self.ui.pBtn_CreateDocx.clicked.connect(self.btnClicked_CreateDocx)
+            # Кнопка "Добавить..."
+            self.ui.pBtn_AddFilesInFolder.clicked.connect(self.btnClicked_AddFilesInFolder)
 
-        # Кнопка "Препросмотр документа..."
-        self.ui.pBnt_PreviewDocx.clicked.connect(self.btnClicked_Preview)
+            # Кнопка "Создать документ..."
+            self.ui.pBtn_CreateDocx.clicked.connect(self.btnClicked_CreateDocx)
 
-    # def btnClicked_ChangeEx(self)-> None:
-    #     """ Кнопка 'Изменить расширения...'
-    #         Блокирует главное окно и открывает диалоговое окно "Изменить расширения...".
-    #         Когда окно закрывают, то таблицу "Файлы исходных кодов"
-    #         обновляют с учетом выбранных расширений.
-    #         Returns: None
-    #     """
+            # Кнопка "Препросмотр документа..."
+            self.ui.pBnt_PreviewDocx.clicked.connect(self.btnClicked_Preview)
+            self.loggers.info('end')
+
+        except Exception as err:
+            self.loggers.warning(f'Exception = {err}')
 
     def btnClicked_AddFilesInFolder(self)-> None:
         """ Кнопка 'Добавить файлы...'
             Открывается диологовое окно файлового проводника.
             Returns: None
         """
-        add_files = getOpenFilesAndDirs(self)
-        add_files.sort()
-        if add_files:
-            # Подготовка списка
-            listTable = set(self.tvSourceCodeFiles.getAllListTable())
+        try:
+            self.loggers.info('start')
+            add_files = getOpenFilesAndDirs(self)
+            add_files.sort()
+            if add_files:
+                # Подготовка списка
+                listTable = set(self.tvSourceCodeFiles.getAllListTable())
 
-            for name in add_files:
-                if os.path.isdir(name):
-                    scanDir_typeTableDir(listTable, name)
-                else:
-                    listTable.add(name)
+                for name in add_files:
+                    if os.path.isdir(name):
+                        scanDir_typeTableDir(listTable, name)
+                    else:
+                        listTable.add(name)
 
-            self.tvSourceCodeFiles.setInfoModel(listTable)
+                self.tvSourceCodeFiles.setInfoModel(listTable)
+            self.loggers.info('end')
+
+        except Exception as err:
+            self.loggers.warning(f'Exception = {err}')
 
     def btnClicked_CreateDocx(self)-> None:
         """ Кнопка 'Создать документ...'
@@ -81,6 +87,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
             где пользователь укажет место для сохранения файла.
             Returns: None
         """
+        self.loggers.info('start')
         NameDocx = self.ui.lineEdit_NameDocx.text()
         NameFile = self.ui.lineEdit_NameFile.text()
 
@@ -91,19 +98,20 @@ class dialogIshodDocx(QtWidgets.QDialog):
                             "All Files (*);;Text Files (*.docx)")
 
         if fileName_choose == "":
-            print("\ nОтменить выбор")
+            self.loggers.debug("\ nОтменить выбор")
             return
 
         # Сохранить
 
-        print("\ nФайл, который вы выбрали для сохранения:")
-        print(fileName_choose)
-        print("Тип фильтра файлов:",filetype)
+        self.loggers.debug("\ nФайл, который вы выбрали для сохранения:")
+        self.loggers.debug(fileName_choose)
+        self.loggers.debug("Тип фильтра файлов:",filetype)
 
         self.create_docx(fileName_choose)
         QMessageBox.information(self, "Сохранение завершено!", "Не забудьте проверить фаил и обновить поле с количеством страниц!")
 
     def btnClicked_Preview(self)-> None:
+        self.loggers.info('start')
         path_to_docx = os.path.join(self.cwd, "tmp_doc.docx")
 
         self.create_docx(path_to_docx)
@@ -113,13 +121,14 @@ class dialogIshodDocx(QtWidgets.QDialog):
         p.wait()
 
     def create_docx(self, path_to_docx)-> None:
-            name_doc = self.ui.lineEdit_NameFile.text() #должен быть заглавными буквами, когда окажется в документе
-            name_num_dec = self.ui.lineEdit_NameDocx.text()
-            files = self.tvSourceCodeFiles.getDocxListTable()
+        self.loggers.info('start')
+        name_doc = self.ui.lineEdit_NameFile.text() #должен быть заглавными буквами, когда окажется в документе
+        name_num_dec = self.ui.lineEdit_NameDocx.text()
+        files = self.tvSourceCodeFiles.getDocxListTable()
 
-            docc = Src2Docx('.\\template.docx', name_doc, name_num_dec)
+        docc = Src2Docx('.\\template.docx', name_doc, name_num_dec)
 
-            docc.add_files(files)
-            docc.add_koll(name_num_dec)
-            docc.add_table_lri()
-            docc.save_docx(path_to_docx)
+        docc.add_files(files)
+        docc.add_koll(name_num_dec)
+        docc.add_table_lri()
+        docc.save_docx(path_to_docx)

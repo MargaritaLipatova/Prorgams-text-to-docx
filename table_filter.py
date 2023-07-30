@@ -10,14 +10,23 @@ from PyQt5.QtCore import *
 
 from common import *
 from dialog_ChangeExtensions import dialogChangeExtensions
+import loggers
 
 class TableFilterEx(QtCore.QSortFilterProxyModel):
-    def __init__(self):
-        super(TableFilterEx, self).__init__()
-        self._listEx = set()
+    def __init__(self, parent=None):
+        super(TableFilterEx, self).__init__(parent)
+
+        try:
+            self.loggers = loggers.get_logger(TableFilterEx.__name__)
+            self.loggers.info('Start')
+            self._listEx = set()
+
+        except Exception as err:
+            self.loggers.warning(f'Exception = {err}')
 
     def filterAcceptsRow(self, sourceRow: int, sourceParent: QModelIndex):
         try:
+            self.loggers.info('Start')
             index: QModelIndex = self.sourceModel().index(sourceRow, self.filterKeyColumn(), sourceParent)
             textEx = self.sourceModel().data(index, role = Qt.DisplayRole)
 
@@ -31,18 +40,21 @@ class TableFilterEx(QtCore.QSortFilterProxyModel):
                 # if not (self.sourceModel().data(index, role = Qt.DisplayRole) in filter): # Если какой-либо фильтр присутствует в строке
                 #     return True
                 #     # return self.sourceModel().data(index).toString().contains(filter)
-        except Exception as e:
-            print("EROOR = ", e)
+        except Exception as err:
+            self.loggers.warning(f'Exception = {err}')
 
         return False
 
     def setFilterEx(self, sEx):
+        self.loggers.info('Start')
         self._listEx.add(sEx)
 
     def removeFilterEx(self, sEx):
+        self.loggers.info('Start')
         self._listEx.remove(sEx)
 
     def removeAllFilterEx(self):
+        self.loggers.info('Start')
         self._listEx.clear()
 
 

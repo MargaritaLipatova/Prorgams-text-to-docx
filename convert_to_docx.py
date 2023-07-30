@@ -8,11 +8,12 @@ from docx.shared import Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
-
+import loggers
 
 class Src2Docx():
 
     def __init__(self, template, name_doc, name_num_dec):
+        self.loggers = loggers.get_logger(Src2Docx.__name__)
         self.doc = Document(template)
         section = self.doc.sections[0]
         section.left_margin = Cm(2)
@@ -53,7 +54,7 @@ class Src2Docx():
                 txt_val = para.text
                 txt_val = txt_val.replace(tmp_name_dec, name_num_dec)
                 para.text = txt_val
-                
+
     def add_heading(self, file_bn):
         style = self.doc.styles['Heading 1']
         style.font.name = 'Times New Roman'
@@ -92,7 +93,7 @@ class Src2Docx():
                 self.add_heading(name_f)
                 self.add_paragraph(text_str)
             except Exception:
-                print("Error file utf8:", i)
+                self.loggers.warning(f"Error file utf8: {i}")
 
     def add_koll(self, texth):
         header = self.doc.sections[0].header.paragraphs[0]
