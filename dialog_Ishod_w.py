@@ -15,10 +15,8 @@ from PyQt5.QtWidgets import *
 
 from common import *
 from convert_to_docx import Src2Docx
-from dialog_ChangeExtensions import dialogChangeExtensions
 from tableview_SourceCodeFiles import TableSourceCodeFiles
-from ui_files.ui_ishod_w import \
-    Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
+from ui_files.ui_ishod_w import Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
 
 
 class Worker(QObject):
@@ -40,6 +38,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
         self.ui.setupUi(self)                 # Установка ui-интерфейсов
         self.setWindowTitle("Исход-В v.1.0")  # Название программы с версией
         self.cwd = os.getcwd()                # Получить текущее местоположение файла программы
+        self.setWindowFlags(Qt.Window)        # Смена кнопок в диалговом окне вправом вехнем углу
 
         self.setWindowFlags(Qt.Window)        # Смена кнопок в диалговом окне вправом вехнем углу
         # Таблица "Файлы исходных кодов"
@@ -51,7 +50,8 @@ class dialogIshodDocx(QtWidgets.QDialog):
         # Виджет с информацией о расположение сохранненого файла по кнопки "Создать документ..."
         self.ui.wStatusPathSavingDocx.setVisible(False) # скрыть информацию
 
-        # Кнопка "Добавить файлы..."
+        # Кнопка "Добавить..."
+
         self.ui.pBtn_AddFilesInFolder.clicked.connect(self.btnClicked_AddFilesInFolder)
 
         # Кнопка "Создать документ..."
@@ -60,16 +60,13 @@ class dialogIshodDocx(QtWidgets.QDialog):
         # Кнопка "Препросмотр документа..."
         self.ui.pBnt_PreviewDocx.clicked.connect(self.btnClicked_Preview)
 
-    def btnClicked_ChangeEx(self)-> None:
-        """ Кнопка 'Изменить расширения...'
-            Блокирует главное окно и открывает диалоговое окно "Изменить расширения...".
-            Когда окно закрывают, то таблицу "Файлы исходных кодов"
-            обновляют с учетом выбранных расширений.
-            Returns: None
-        """
-        _app = dialogChangeExtensions(self)
-        a = _app.exec()
-        print(a)
+    # def btnClicked_ChangeEx(self)-> None:
+    #     """ Кнопка 'Изменить расширения...'
+    #         Блокирует главное окно и открывает диалоговое окно "Изменить расширения...".
+    #         Когда окно закрывают, то таблицу "Файлы исходных кодов"
+    #         обновляют с учетом выбранных расширений.
+    #         Returns: None
+    #     """
 
     def btnClicked_AddFilesInFolder(self)-> None:
         """ Кнопка 'Добавить файлы...'
@@ -79,21 +76,16 @@ class dialogIshodDocx(QtWidgets.QDialog):
         add_files = getOpenFilesAndDirs(self)
         add_files.sort()
         if add_files:
-
             # Подготовка списка
             listTable = set(self.tvSourceCodeFiles.getAllListTable())
 
-            for name in add_files:    # Проход по выделенному списку
+            for name in add_files:
                 if os.path.isdir(name):
-                        if self.ui.checkBox_FolderNesting.isChecked():
-                            scanDir_typeTableDir(listTable, name)
+                    scanDir_typeTableDir(listTable, name)
                 else:
                     listTable.add(name)
 
             self.tvSourceCodeFiles.setInfoModel(listTable)
-            print("*******************************************")
-            print(self.tvSourceCodeFiles.getDocxListTable())
-            print("*******************************************")
 
     def btnClicked_CreateDocx(self)-> None:
         """ Кнопка 'Создать документ...'
@@ -101,6 +93,9 @@ class dialogIshodDocx(QtWidgets.QDialog):
             где пользователь укажет место для сохранения файла.
             Returns: None
         """
+        NameDocx = self.ui.lineEdit_NameDocx.text()
+        NameFile = self.ui.lineEdit_NameFile.text()
+
         ##!!!!!!! В стадии написания и отладки
         fileName_choose, filetype = QFileDialog.getSaveFileName(self,
                             "Сохранение файла",
