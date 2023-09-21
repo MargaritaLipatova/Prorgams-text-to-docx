@@ -6,18 +6,28 @@ Created on Wed Dec 14 23:24:09 2022
 """
 #from tableview_SourceCodeFiles import WidgetSourceCodeFiles
 import os
+import subprocess
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import subprocess
 
 from common import *
 from convert_to_docx import Src2Docx
 from tableview_SourceCodeFiles import TableSourceCodeFiles
 from ui_files.ui_ishod_w import Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
 import loggers
+
+class Worker(QObject):
+    finished = pyqtSignal()
+    path = ".\\tmp_doc.docx"
+
+    def run(self):
+        """Long-running task."""
+        p = subprocess.Popen(self.path, stdout=subprocess.PIPE, shell=True)
+        p.wait()
+        self.finished.emit()
 
 class dialogIshodDocx(QtWidgets.QDialog):
     """ Главное диалоговое окно 'Исход-В'
@@ -95,7 +105,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
         fileName_choose, filetype = QFileDialog.getSaveFileName(self,
                             "Сохранение файла",
                             self.cwd, # Начальный путь
-                            "All Files (*);;Text Files (*.docx)")
+                            "All Files (*);;Text Files (*.txt)")
 
         if fileName_choose == "":
             self.loggers.debug("\ nОтменить выбор")
@@ -116,17 +126,32 @@ class dialogIshodDocx(QtWidgets.QDialog):
 
         self.create_docx(path_to_docx)
 
-        p = subprocess.Popen(path_to_docx, stdout=subprocess.PIPE, shell=True)
+       # create thread
+        self.thread = QThread()
+        # create object which will be moved to another thread
+        self.worker = Worker()
+        # move object to another thread
+        self.worker.moveToThread(self.thread)
+        # after that, we can connect signals from this object to slot in GUI thread
+        # connect started signal to run method of object in another thread
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        # start thread
+        self.thread.start()
 
-        p.wait()
+        self.setDisabled(True)
+
+        self.thread.finished.connect(lambda: self.setDisabled(False))
 
     def create_docx(self, path_to_docx)-> None:
         self.loggers.info('start')
-        name_doc = self.ui.lineEdit_NameFile.text() #должен быть заглавными буквами, когда окажется в документе
+        name_doc = self.ui.lineEdit_NameFile.text().upper() #должен быть заглавными буквами, когда окажется в документе
         name_num_dec = self.ui.lineEdit_NameDocx.text()
         files = self.tvSourceCodeFiles.getDocxListTable()
 
-        docc = Src2Docx('.\\template.docx', name_doc, name_num_dec)
+        docc = Src2Docx('.\\auxiliary\\template.docx', name_doc, name_num_dec)
 
         docc.add_files(files)
         docc.add_koll(name_num_dec)
