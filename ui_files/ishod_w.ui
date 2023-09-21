@@ -177,7 +177,7 @@
           </property>
           <property name="font">
            <font>
-            <family>Calibri</family>
+            <family>Arial</family>
             <pointsize>14</pointsize>
             <weight>50</weight>
             <bold>false</bold>
@@ -285,7 +285,7 @@
           </property>
           <property name="font">
            <font>
-            <family>Calibri</family>
+            <family>Arial</family>
             <pointsize>14</pointsize>
             <weight>50</weight>
             <bold>false</bold>
@@ -364,7 +364,7 @@
        </property>
        <property name="font">
         <font>
-         <family>Calibri</family>
+         <family>Arial</family>
          <pointsize>14</pointsize>
          <weight>50</weight>
          <bold>false</bold>
