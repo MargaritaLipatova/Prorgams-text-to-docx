@@ -1,4 +1,3 @@
-import inspect
 import json
 import logging
 import logging.config
@@ -6,8 +5,8 @@ import os
 from pathlib import Path
 
 
-FOLDER_LOG = Path(Path(__file__).resolve().parent.parent.parent, 'logs')
-LOGGING_CONFIG_FILE = Path(Path(__file__).resolve().parent, 'loggers.json')
+FOLDER_LOG = Path( '.\\logs')
+LOGGING_CONFIG_FILE = Path('.\\auxiliary\\loggers.json')
 
 
 def create_log_folder(folder: str = FOLDER_LOG) -> None:
@@ -33,7 +32,8 @@ def get_logger(name: str, template: str = 'default') -> logging.Logger:
     with open(Path(LOGGING_CONFIG_FILE), 'r') as f_log_cfg:
         dict_config = json.load(f_log_cfg)
     create_log_folder()
-    dict_config['handlers']['rotating_file']['filename'] = Path(FOLDER_LOG, dict_config['handlers']['rotating_file']['filename'])
+    dict_config['handlers']['rotating_file']['filename'] = Path(FOLDER_LOG,
+                                                                dict_config['handlers']['rotating_file']['filename'])
     dict_config['loggers'][name] = dict_config['loggers'][template]
     logging.config.dictConfig(dict_config)
     return logging.getLogger(name)
@@ -53,7 +53,8 @@ def get_default_logger() -> logging.Logger:
     with open(Path(LOGGING_CONFIG_FILE), 'r') as f_log_cfg:
         dict_config = json.load(f_log_cfg)
     create_log_folder()
-    dict_config['handlers']['rotating_file']['filename'] = Path(FOLDER_LOG, dict_config['handlers']['rotating_file']['filename'])
+    dict_config['handlers']['rotating_file']['filename'] = Path(FOLDER_LOG,
+                                                                dict_config['handlers']['rotating_file']['filename'])
     logging.config.dictConfig(dict_config)
     return logging.getLogger('default')
 

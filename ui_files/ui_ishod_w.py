@@ -21,7 +21,7 @@ class Ui_DialogIshodDocx(object):
         DialogIshodDocx.setFont(font)
         DialogIshodDocx.setWindowTitle("Исход-В")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icon/icon/Box with Papers@2x.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/icon/icon/gimp_logo.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         DialogIshodDocx.setWindowIcon(icon)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(DialogIshodDocx)
         self.verticalLayout_2.setObjectName("verticalLayout_2")

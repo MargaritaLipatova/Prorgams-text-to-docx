@@ -50,7 +50,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
             self.tvSourceCodeFiles = TableSourceCodeFiles(self)
             self.formlayout.addRow(self.tvSourceCodeFiles)
 
-            # Виджет с информацией о расположение сохранненого файла по кнопки "Создать документ..."
+            # Виджет с информацией о расположении сохранненого файла по кнопки "Создать документ..."
             self.ui.wStatusPathSavingDocx.setVisible(False) # скрыть информацию
 
             # Кнопка "Добавить..."
@@ -99,13 +99,14 @@ class dialogIshodDocx(QtWidgets.QDialog):
         """
         self.loggers.info('start')
         NameDocx = self.ui.lineEdit_NameDocx.text()
-        NameFile = self.ui.lineEdit_NameFile.text()
+        # NameFile = self.ui.lineEdit_NameFile.text()
+        default_filename = os.path.join(self.cwd, NameDocx)
 
         ##!!!!!!! В стадии написания и отладки
         fileName_choose, filetype = QFileDialog.getSaveFileName(self,
                             "Сохранение файла",
-                            self.cwd, # Начальный путь
-                            "All Files (*);;Text Files (*.txt)")
+                            default_filename, # Начальный путь
+                            "All Files (*);;Text Files (*.docx)")
 
         if fileName_choose == "":
             self.loggers.debug("\ nОтменить выбор")
@@ -148,7 +149,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
     def create_docx(self, path_to_docx)-> None:
         self.loggers.info('start')
         name_doc = self.ui.lineEdit_NameFile.text().upper() #должен быть заглавными буквами, когда окажется в документе
-        name_num_dec = self.ui.lineEdit_NameDocx.text()
+        name_num_dec = self.ui.lineEdit_NameDocx.text().upper()
         files = self.tvSourceCodeFiles.getDocxListTable()
 
         docc = Src2Docx('.\\auxiliary\\template.docx', name_doc, name_num_dec)

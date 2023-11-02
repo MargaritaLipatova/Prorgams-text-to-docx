@@ -1,0 +1,30 @@
+{
+    "version": 1.0,
+    "disable_existing_loggers": false,
+    "formatters": {
+        "default": {
+            "format": "%(asctime)s %(levelname).1s Gui:%(name)-14s.%(funcName)-16s %(message)s"
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO",
+            "formatter": "default"
+        },
+        "rotating_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "DEBUG",
+            "formatter": "default",
+            "filename": "ishod_w.log",
+            "maxBytes": 1048576,
+            "backupCount": 5
+        }
+    },
+    "loggers": {
+        "default": {
+            "handlers": ["console", "rotating_file"],
+            "level": "WARNING"
+        }
+    }
+}
