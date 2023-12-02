@@ -4,16 +4,13 @@ Created on Wed Dec 14 23:24:09 2022
 
 @author: Vasilyeva
 """
-#from tableview_SourceCodeFiles import WidgetSourceCodeFiles
 import os
 import subprocess
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
+from PyQt5.QtWidgets import QFormLayout, QFileDialog, QMessageBox, QDialog
 
-from common import *
+from common import getOpenFilesAndDirs, scanDir_typeTableDir
 from convert_to_docx import Src2Docx
 from tableview_SourceCodeFiles import TableSourceCodeFiles
 from ui_files.ui_ishod_w import Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
@@ -29,7 +26,7 @@ class Worker(QObject):
         p.wait()
         self.finished.emit()
 
-class dialogIshodDocx(QtWidgets.QDialog):
+class dialogIshodDocx(QDialog):
     """ Главное диалоговое окно 'Исход-В'
     """
     def __init__(self, parent=None):
@@ -77,7 +74,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
             add_files.sort()
             if add_files:
                 # Подготовка списка
-                listTable = set(self.tvSourceCodeFiles.getAllListTable())
+                listTable:set = self.tvSourceCodeFiles.getAllListTable()
 
                 for name in add_files:
                     if os.path.isdir(name):
@@ -86,7 +83,7 @@ class dialogIshodDocx(QtWidgets.QDialog):
                         listTable.add(name)
 
                 self.tvSourceCodeFiles.setInfoModel(listTable)
-            self.loggers.info('end')
+            self.loggers.info('End')
 
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
