@@ -5,14 +5,10 @@ Created on Sun June 11 2023
 @author: Vasilyeva
 """
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import *
-
-from common import *
-from dialog_ChangeExtensions import dialogChangeExtensions
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QModelIndex
 import loggers
 
-class TableFilterEx(QtCore.QSortFilterProxyModel):
+class TableFilterEx(QSortFilterProxyModel):
     def __init__(self, parent=None):
         super(TableFilterEx, self).__init__(parent)
 
@@ -26,7 +22,6 @@ class TableFilterEx(QtCore.QSortFilterProxyModel):
 
     def filterAcceptsRow(self, sourceRow: int, sourceParent: QModelIndex):
         try:
-            self.loggers.info('Start')
             index: QModelIndex = self.sourceModel().index(sourceRow, self.filterKeyColumn(), sourceParent)
             textEx = self.sourceModel().data(index, role = Qt.DisplayRole)
 
@@ -37,6 +32,7 @@ class TableFilterEx(QtCore.QSortFilterProxyModel):
             else:
                 # Строка скрыта
                 self.sourceModel().intermediateTable[sourceRow][0] = True
+                return False
                 # if not (self.sourceModel().data(index, role = Qt.DisplayRole) in filter): # Если какой-либо фильтр присутствует в строке
                 #     return True
                 #     # return self.sourceModel().data(index).toString().contains(filter)

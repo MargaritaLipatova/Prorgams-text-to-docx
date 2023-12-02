@@ -6,8 +6,7 @@ Created on Sat Jan 28 13:05:32 2023
 """
 import os
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QFileDialog
 
 # ==================================================================
 # ==================================================================
@@ -53,7 +52,7 @@ def getOpenFilesAndDirs(parent=None, caption='', directory='', filter='', initia
 # =============================================================================
 def scanDir_typeTableDir(res: set, folder):
     for root, dirs, files in os.walk(folder, topdown=True):
-        r1 = root.replace('\\','/')
+        # r1 = root.replace('\\','/')
         for name in files:
             path = os.path.join(root, name).replace('\\','/')
             res.add(path)

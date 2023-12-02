@@ -13,7 +13,7 @@ import loggers
 
 def start_main():
     try:
-        gui_loggers = loggers.get_default_logger()
+        gui_loggers = loggers.get_logger('main')
         app = QtWidgets.QApplication([])
         application = dialogIshodDocx()
         application.show()

@@ -5,9 +5,9 @@ Created on Wed Dec 14 23:49:35 2022
 @author: Vasilyeva
 """
 
-from PyQt5 import QtGui, uic
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+# from PyQt5 import QtGui, uic
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QListWidgetItem
 from ui_files.ui_dialogChangeExtensions import Ui_dialogChangeExtensions # импорт нашего сгенерированного файла
 import loggers
 
@@ -74,6 +74,7 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
                 newItem = QListWidgetItem(filter)
                 newItem.setCheckState(Qt.CheckState.Checked)
                 self.ui.listWidget_Extensions.insertItem(self.ui.listWidget_Extensions.count(), newItem)
+            self.loggers.info('End')
 
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
@@ -85,6 +86,7 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
             itemsFilter = self.ui.listWidget_Extensions.findItems(filter, Qt.MatchFlag.MatchFixedString)
             if itemsFilter:
                 self.ui.listWidget_Extensions.removeItemWidget(itemsFilter[0])
+            self.loggers.info('End')
 
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
@@ -108,6 +110,7 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
             self.ui.listWidget_Extensions.item(0).setCheckState(global_state)
             self.is_filter = global_state != Qt.CheckState.Checked
             self.ui.listWidget_Extensions.blockSignals(False)
+            self.loggers.info('End')
 
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
@@ -122,6 +125,7 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
 
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
+        self.loggers.info('End')
 
         return listFilters
 
