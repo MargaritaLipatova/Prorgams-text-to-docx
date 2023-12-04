@@ -175,10 +175,10 @@ class TableSourceCodeFiles(QTableView):
             self.srcModel:TableModel = TableModel(self.cfgTable, self)
             self.tableFilterEx = TableFilterEx(self)
             self.tableFilterEx.setSourceModel(self.srcModel)
+            self.tableFilterEx.setDynamicSortFilter(True)
+            self.tableFilterEx.setFilterKeyColumn(self.cfgTable.idColumnEx())
             self.setModel(self.tableFilterEx)
 
-            # self.tableFilterEx.setDynamicSortFilter(True)
-            self.tableFilterEx.setFilterKeyColumn(self.cfgTable.idColumnEx())
 
 
             self.setColumnWidth(self.cfgTable.idColumnName(),  self.cfgTable.widthColumnName())
@@ -239,12 +239,6 @@ class TableSourceCodeFiles(QTableView):
         try:
             self.loggers.info('Start')
             self.filter_pBtn.setIcon(self.icon_filter_Action if self.dlgFilterEx.is_filter else self.icon_filter_noAction)
-            # if self.dlgFilterEx.is_filter:
-            #     self.filter_pBtn.setIcon(self.icon_filter_noAction)
-            #     self.dlgFilterEx.is_filter = False
-            # else:
-            #     self.filter_pBtn.setIcon(self.icon_filter_Action)
-            #     self.dlgFilterEx.is_filter = True
             self.loggers.debug('End')
 
         except Exception as err:
@@ -266,7 +260,6 @@ class TableSourceCodeFiles(QTableView):
             self.tableFilterEx.removeAllFilterEx()
             for ftr in self.dlgFilterEx.getFilters():
                 self.tableFilterEx.setFilterEx(ftr)
-            # self.model.layoutChanged.emit()
             self.loggers.info('End')
 
         except Exception as err:
@@ -405,7 +398,7 @@ class TableSourceCodeFiles(QTableView):
             if not any(item for item in self.srcModel.intermediateTable if item[2] == nameEx):
                 self.tableFilterEx.removeFilterEx(nameEx)
                 self.listEx.remove(nameEx)
-                # self.dlgFilterEx.removeFilter(nameEx)
+                self.dlgFilterEx.removeFilter(nameEx)
 
                 for pObj in self.menuDeleteFilesEx.actions():
                     if pObj.text() == nameEx:
@@ -427,7 +420,7 @@ class TableSourceCodeFiles(QTableView):
             self.srcModel.removeRowExs(nameEx)
             self.tableFilterEx.removeFilterEx(nameEx)
             self.listEx.remove(nameEx)
-            # self.dlgFilterEx.removeFilter(nameEx)
+            self.dlgFilterEx.removeFilter(nameEx)
             self.menuDeleteFilesEx.removeAction(pObj)
 
             self.loggers.debug('End')

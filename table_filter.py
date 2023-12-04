@@ -33,9 +33,6 @@ class TableFilterEx(QSortFilterProxyModel):
                 # Строка скрыта
                 self.sourceModel().intermediateTable[sourceRow][0] = True
                 return False
-                # if not (self.sourceModel().data(index, role = Qt.DisplayRole) in filter): # Если какой-либо фильтр присутствует в строке
-                #     return True
-                #     # return self.sourceModel().data(index).toString().contains(filter)
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
 
@@ -44,14 +41,18 @@ class TableFilterEx(QSortFilterProxyModel):
     def setFilterEx(self, sEx):
         self.loggers.info('Start')
         self._listEx.add(sEx)
+        self.invalidateFilter()
+
 
     def removeFilterEx(self, sEx):
         self.loggers.info('Start')
         self._listEx.remove(sEx)
+        self.invalidateFilter()
 
     def removeAllFilterEx(self):
         self.loggers.info('Start')
         self._listEx.clear()
+        self.invalidateFilter()
 
 
 

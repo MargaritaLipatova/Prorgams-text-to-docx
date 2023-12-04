@@ -85,7 +85,9 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
             self.loggers.info('Start')
             itemsFilter = self.ui.listWidget_Extensions.findItems(filter, Qt.MatchFlag.MatchFixedString)
             if itemsFilter:
-                self.ui.listWidget_Extensions.removeItemWidget(itemsFilter[0])
+                self.ui.listWidget_Extensions.removeItemWidget(
+                    self.ui.listWidget_Extensions.takeItem(
+                        self.ui.listWidget_Extensions.row(itemsFilter[0])))
             self.loggers.info('End')
 
         except Exception as err:
