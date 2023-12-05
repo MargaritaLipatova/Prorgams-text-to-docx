@@ -46,8 +46,11 @@ def getOpenFilesAndDirs(parent=None, caption='', directory='', filter='', initia
 
     # очищаем содержимое строки редактирования всякий раз, когда изменяется текущий каталог
     dialog.directoryEntered.connect(lambda: lineEdit.setText(''))
-    dialog.exec_()
-    return dialog.selectedFiles()
+    res = dialog.exec_()
+    if res == QFileDialog.Rejected:
+        return []
+    else:
+        return dialog.selectedFiles()
 
 # =============================================================================
 def scanDir_typeTableDir(res: set, folder):
