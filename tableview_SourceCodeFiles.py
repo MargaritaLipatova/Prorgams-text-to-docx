@@ -4,13 +4,17 @@ Created on Sun Jan 15 14:39:51 2023
 
 @author: Vasilyeva
 """
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QSize, QPoint
+from PyQt5.QtCore import (QAbstractTableModel, QModelIndex, QPoint, QSize, Qt,
+                          QVariant)
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QPushButton, QAction, QMenu
+from PyQt5.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMenu,
+                             QPushButton, QTableView)
+
+import loggers
 from common import os
 from dialog_ChangeExtensions import dialogChangeExtensions
 from table_filter import TableFilterEx
-import loggers
+
 
 #===============================================================================
 class cfgTableSourceCodeFiles(object):
@@ -55,13 +59,15 @@ class cfgTableSourceCodeFiles(object):
 
 #===============================================================================
 class TableModel(QAbstractTableModel):
+    """ Модель-представления таблицы 'Файлы исходных кодов'
+    """
     def __init__(self, cfgTable: cfgTableSourceCodeFiles, parent=None):
         super(TableModel, self).__init__(parent)
         try:
             self.loggers = loggers.get_logger(TableModel.__name__)
             self.loggers.info('Start')
-            self.cfgTable = cfgTable
-            self._intermediateTable = []
+            self.cfgTable = cfgTable     # конфигурация таблицы
+            self._intermediateTable = [] # массив данных для модели-представления
 
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
@@ -77,6 +83,8 @@ class TableModel(QAbstractTableModel):
         self.loggers.debug(f'Count row table={len(data)}')
 
     def data(self, index, role):
+        """ Отображение данных в таблице.
+        """
         try:
             if role == Qt.TextAlignmentRole:
                 if index.column() == self.cfgTable.idColumnEx():
@@ -132,6 +140,7 @@ class TableModel(QAbstractTableModel):
 
     def removeRowExs(self, nameEx: str):
         """ Удаление строк по фильтру
+
         Args:
             nameEx (str) фильтр
         """
@@ -156,7 +165,6 @@ class TableModel(QAbstractTableModel):
         # self.layoutChanged.emit()
         self.loggers.debug('Stop')
 #===============================================================================
-
 
 
 #===============================================================================
@@ -224,6 +232,10 @@ class TableSourceCodeFiles(QTableView):
             self.loggers.warning(f'Exception = {err}')
 
     def filter_pBtn_HHeaderSectionResized(self, logicalIndex, oldSize, newSize):
+        """ Обработка сигнала: sectionResized, отвечающего за изменение размера
+            заголовка таблицы.
+            При возникновение сигнала изменяется положение кнопки 'Фильтр'.
+        """
         try:
             self.loggers.info('Start')
             if (logicalIndex + 1) == self.cfgTable.idColumnEx():
@@ -236,6 +248,8 @@ class TableSourceCodeFiles(QTableView):
             self.loggers.warning(f'Exception = {err}')
 
     def changeIconFilter(self):
+        """ Изменение цвета кнопки 'Фильтр'
+        """
         try:
             self.loggers.info('Start')
             self.filter_pBtn.setIcon(self.icon_filter_Action if self.dlgFilterEx.is_filter else self.icon_filter_noAction)
@@ -246,6 +260,8 @@ class TableSourceCodeFiles(QTableView):
 
 
     def btnClicked_filterEx(self):
+        """ Кнопка 'Фильтр' открывает окно с выбором фильтров
+        """
         try:
             self.loggers.info('Start')
             pointBtn = self.filter_pBtn.mapToGlobal(QPoint(0,0))
@@ -297,7 +313,19 @@ class TableSourceCodeFiles(QTableView):
         return listDocx
 
 
-    def __getIntermediateModel(self, data: set):
+    def __getIntermediateModel(self, data: set)->[]:
+        """ Производится подготовка массива для модели-представления.
+            Один элемент(строка модели) представляет список из 4 параметров:
+              [0] - фильтр: True  - строка скрыта(галочка -)
+                            False - строка видна (галочка +)
+              [1] - имя файла
+              [2] - имя расширения
+              [3] - путь к файлу
+        Args:
+            data (set): список путей файлов
+        Returns:
+            []: Массив для модели-представления
+        """
         try:
             self.loggers.info('Start')
             self.listEx = []
@@ -305,7 +333,7 @@ class TableSourceCodeFiles(QTableView):
             for path in data:
                 basename  = os.path.splitext(path)
                 file_name = os.path.basename(basename[0])
-                ex = basename[-1] #str(os.path.basename(name).suffix) #str(basename.split(basename.split('.')[0])[-1])
+                ex = basename[-1]
                 intermediateTable.append(   [False,       # statehiddenfilters
                                             file_name,    # basename.split('.')[0], # name file
                                             ex,           # ex
@@ -323,9 +351,10 @@ class TableSourceCodeFiles(QTableView):
         return intermediateTable
 
     def setInfoModel(self, data: set)->None:
-        # -----------------------------------
-        # Промежуточный вид модели для отображения в таблице
-        # -----------------------------------
+        """ Установка вида модели для отображения в таблице
+        Args:
+            data (set): список файлов
+        """
         try:
             self.loggers.info('Start')
             intermediateTable = self.__getIntermediateModel(data)
@@ -340,8 +369,7 @@ class TableSourceCodeFiles(QTableView):
             self.loggers.warning(f'Exception = {err}')
 
     def setTableFilterEx(self):
-        """
-            Добавление расширений в фильтр
+        """ Добавление расширений в фильтр
         """
         try:
             self.loggers.info('Start')
@@ -353,8 +381,7 @@ class TableSourceCodeFiles(QTableView):
             self.loggers.warning(f'Exception = {err}')
 
     def setActionEx(self):
-        """
-            Очищение и добавление расширений в меню "Удалить файлы по расширению"
+        """ Очищение и добавление расширений в меню "Удалить файлы по расширению"
         """
         try:
             self.loggers.info('Start')
@@ -384,6 +411,8 @@ class TableSourceCodeFiles(QTableView):
             self.loggers.warning(f'Exception = {err}')
 
     def deleteFile(self):
+        """ Удаление одного файла по кнопке контекстного меню "Удалить"
+        """
         try:
             self.loggers.info('Start')
             selrow = self.selectionModel().currentIndex().row()
@@ -411,6 +440,8 @@ class TableSourceCodeFiles(QTableView):
             self.loggers.warning(f'Exception = {err}')
 
     def deleteFilesEx(self):
+        """ Удаление файлов по кнопке контекстного меню "Удалить файлы по расширению"
+        """
         try:
             self.loggers.info('Start')
             pObj = self.sender()
@@ -430,6 +461,8 @@ class TableSourceCodeFiles(QTableView):
 
 
     def createContextMenu(self):
+        """ Создание контекстного меню таблицы
+        """
         try:
             self.loggers.info('Start')
             self.actionDeleteFile = QAction("Удалить", self)
@@ -446,3 +479,15 @@ class TableSourceCodeFiles(QTableView):
 
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
+#===============================================================================
+
+
+            self.qMenuTable.addAction(self.actionDeleteFile)
+            self.qMenuTable.addMenu(self.menuDeleteFilesEx)
+            self.loggers.debug('End')
+
+        except Exception as err:
+            self.loggers.warning(f'Exception = {err}')
+#===============================================================================
+
+

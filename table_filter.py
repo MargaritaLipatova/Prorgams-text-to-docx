@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-__summury__
-Created on Sun June 11 2023
+     Файл содержит реализацию proxy модели, которая является
+    посредником между таблицей и моделью представления.
+     ProxyModel осуществляет фильтрацию строк и записывает в модель представления
+    состояние строки по фильтру([0]) .
+
+    Created on Sun June 11 2023
 @author: Vasilyeva
 """
 
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QModelIndex
+from PyQt5.QtCore import QModelIndex, QSortFilterProxyModel, Qt
+
 import loggers
+
 
 class TableFilterEx(QSortFilterProxyModel):
     def __init__(self, parent=None):
@@ -38,18 +44,30 @@ class TableFilterEx(QSortFilterProxyModel):
 
         return False
 
-    def setFilterEx(self, sEx):
+    def setFilterEx(self, sEx: str):
+        """ Устанавка одного фильтра
+
+        Args:
+            sEx (str): имя фильтра
+        """
         self.loggers.info('Start')
         self._listEx.add(sEx)
         self.invalidateFilter()
 
 
-    def removeFilterEx(self, sEx):
+    def removeFilterEx(self, sEx: str):
+        """ Удаление одного фильтра
+
+        Args:
+            sEx (str): имя фильтра
+        """
         self.loggers.info('Start')
         self._listEx.remove(sEx)
         self.invalidateFilter()
 
     def removeAllFilterEx(self):
+        """Очистка спсика фильтра
+        """
         self.loggers.info('Start')
         self._listEx.clear()
         self.invalidateFilter()

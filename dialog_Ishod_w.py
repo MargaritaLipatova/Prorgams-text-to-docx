@@ -7,14 +7,16 @@ Created on Wed Dec 14 23:24:09 2022
 import os
 import subprocess
 
-from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
-from PyQt5.QtWidgets import QFormLayout, QFileDialog, QMessageBox, QDialog
+from PyQt5.QtCore import QObject, Qt, QThread, pyqtSignal
+from PyQt5.QtWidgets import QDialog, QFileDialog, QFormLayout, QMessageBox
 
+import loggers
 from common import getOpenFilesAndDirs, scanDir_typeTableDir
 from convert_to_docx import Src2Docx
 from tableview_SourceCodeFiles import TableSourceCodeFiles
-from ui_files.ui_ishod_w import Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
-import loggers
+from ui_files.ui_ishod_w import \
+    Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
+
 
 class Worker(QObject):
     finished = pyqtSignal()
@@ -70,19 +72,23 @@ class dialogIshodDocx(QDialog):
         """
         try:
             self.loggers.info('start')
-            add_files = getOpenFilesAndDirs(self)
+            add_files = getOpenFilesAndDirs(self) # Выбор файлов и/или папок
             add_files.sort()
+
             if add_files:
-                # Подготовка списка
+                # Ранее добавленные файлы в таблицу
                 listTable:set = self.tvSourceCodeFiles.getAllListTable()
 
+                # Подготовка списка файлов
                 for name in add_files:
                     if os.path.isdir(name):
                         scanDir_typeTableDir(listTable, name)
                     else:
                         listTable.add(name)
 
+                # Добавление файлов в таблицу
                 self.tvSourceCodeFiles.setInfoModel(listTable)
+
             self.loggers.info('End')
 
         except Exception as err:
@@ -119,6 +125,9 @@ class dialogIshodDocx(QDialog):
         QMessageBox.information(self, "Сохранение завершено!", "Не забудьте проверить фаил и обновить поле с количеством страниц!")
 
     def btnClicked_Preview(self)-> None:
+        """ Кнопка 'Предпросмотр...'
+            Открывается файл для сохранения.
+        """
         self.loggers.info('start')
         path_to_docx = os.path.join(self.cwd, "tmp_doc.docx")
 
@@ -144,6 +153,10 @@ class dialogIshodDocx(QDialog):
         self.thread.finished.connect(lambda: self.setDisabled(False))
 
     def create_docx(self, path_to_docx)-> None:
+        """ Создание/сохранение файла
+        Args:
+            path_to_docx (_type_): путь к файлу
+        """
         self.loggers.info('start')
         name_doc = self.ui.lineEdit_NameFile.text().upper() #должен быть заглавными буквами, когда окажется в документе
         name_num_dec = self.ui.lineEdit_NameDocx.text().upper()
