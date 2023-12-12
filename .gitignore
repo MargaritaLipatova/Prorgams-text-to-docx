@@ -5,3 +5,4 @@ __pycache__/dialog_Ishod_w.cpython-39.pyc
 *.pyc
 *build/
 logs/
+.coverage
