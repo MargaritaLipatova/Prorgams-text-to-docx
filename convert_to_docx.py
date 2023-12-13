@@ -14,6 +14,7 @@ class Src2Docx():
 
     def __init__(self, template, name_doc, name_num_dec):
         self.loggers = loggers.get_logger(Src2Docx.__name__)
+        self.loggers.info('start')
         self.doc = Document(template)
         section = self.doc.sections[0]
         section.left_margin = Cm(2)
@@ -24,6 +25,7 @@ class Src2Docx():
         self.add_name_and_dec_num(template, name_doc, name_num_dec)
 
     def add_name_and_dec_num(self, template, name_doc, name_num_dec):
+        self.loggers.info('start')
         tmp_name_doc = 'ИМЯ ДОКУМЕНТА'
         tmp_name_dec = 'ДЕЦ.НОМЕР'
         # проходимся по таблицам
@@ -55,6 +57,7 @@ class Src2Docx():
                 para.text = txt_val
 
     def add_heading(self, file_bn):
+        self.loggers.info('start')
         style = self.doc.styles['Heading 1']
         style.font.name = 'Times New Roman'
         style.font.size = Pt(14)
@@ -70,6 +73,7 @@ class Src2Docx():
         h_fmt.first_line_indent = Cm(1.5)
 
     def add_paragraph(self, text):
+        self.loggers.info('start')
         style = self.doc.styles['Normal']
         style.font.size = Pt(14)
         style.font.name = 'Times New Roman'
@@ -83,6 +87,7 @@ class Src2Docx():
         p_fmt.first_line_indent = Cm(1.5)
 
     def add_files(self, files):
+        self.loggers.info('start')
         for i in files:
             name_f = os.path.basename(i)
             f = open(i,'r', encoding="utf-8")#, errors='ignore')
@@ -95,6 +100,7 @@ class Src2Docx():
                 self.loggers.warning(f"Error file utf8: {i}")
 
     def add_koll(self, texth):
+        self.loggers.info('start')
         header = self.doc.sections[0].header.paragraphs[0]
         header.text = texth
         header.style.font.size = Pt(14)
@@ -102,6 +108,7 @@ class Src2Docx():
         header.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     def add_table_lri(self):
+        self.loggers.info('start')
         path_lri = ".\\auxiliary\\template_lri.docx"
         doc_lri = Document(path_lri)
 
@@ -114,4 +121,5 @@ class Src2Docx():
                 p._p = p._element = None
 
     def save_docx(self, path):
+        self.loggers.info('start')
         self.doc.save(path)
