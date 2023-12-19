@@ -202,7 +202,7 @@ class TableSourceCodeFiles(QTableView):
             self.setModel(self.tableFilterEx)
 
 
-
+            self.setSortingEnabled(True)
             self.setColumnWidth(self.cfgTable.idColumnName(),  self.cfgTable.widthColumnName())
             self.setColumnWidth(self.cfgTable.idColumnEx(),    self.cfgTable.widthColumnEx())
             self.setEditTriggers(QAbstractItemView.NoEditTriggers)
