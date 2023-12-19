@@ -164,6 +164,20 @@ class TableModel(QAbstractTableModel):
         self.endRemoveRows()
         # self.layoutChanged.emit()
         self.loggers.debug('Stop')
+
+    def removeRowPath(self, path: str):
+        """ Удаление по названию пути
+        Args:
+            path (str) путь к файлу
+        """
+        self.loggers.debug('Start')
+        for x in range(len(self.intermediateTable)):
+            if self._intermediateTable[x][3] == path:
+                self.beginRemoveRows(QModelIndex(), x, x)
+                self._intermediateTable.remove(self._intermediateTable[x])
+                self.endRemoveRows()
+                break
+        self.loggers.debug('Stop')
 #===============================================================================
 
 
@@ -415,24 +429,34 @@ class TableSourceCodeFiles(QTableView):
         """
         try:
             self.loggers.info('Start')
-            selrow = self.selectionModel().currentIndex().row()
-            nameEx = self.srcModel.intermediateTable[selrow][2]
-            self.loggers.debug( "selection", selrow,
-                                ", text ", self.srcModel.intermediateTable[selrow][1],
-                                ", ex ", self.srcModel.intermediateTable[selrow][2])
+            name = None
+            nameEx = None
+            namePath = None
+            for index in self.selectionModel().selectedIndexes():
+                if index.column()== self.cfgTable.idColumnName():
+                    name = index.data(role=Qt.DisplayRole)
+                    namePath = index.data(role=Qt.ToolTipRole)
+                elif index.column()== self.cfgTable.idColumnEx():
+                    nameEx = index.data(role=Qt.DisplayRole)
 
-            self.srcModel.removeRowNmb(selrow)
+            self.loggers.info( f"selection: text = {name} , ex = {nameEx}, path = {namePath}")
 
-            # проверка не был ли этот файл единственным с таким расширением
-            if not any(item for item in self.srcModel.intermediateTable if item[2] == nameEx):
-                self.tableFilterEx.removeFilterEx(nameEx)
-                self.listEx.remove(nameEx)
-                self.dlgFilterEx.removeFilter(nameEx)
+            if namePath or name or nameEx:
+                self.srcModel.removeRowPath(namePath)
 
-                for pObj in self.menuDeleteFilesEx.actions():
-                    if pObj.text() == nameEx:
-                        self.menuDeleteFilesEx.removeAction(pObj)
-                        break
+                # проверка не был ли этот файл единственным с таким расширением
+                if not any(item for item in self.srcModel.intermediateTable if item[2] == nameEx):
+                    self.tableFilterEx.removeFilterEx(nameEx)
+                    self.listEx.remove(nameEx)
+                    self.dlgFilterEx.removeFilter(nameEx)
+
+                    for pObj in self.menuDeleteFilesEx.actions():
+                        if pObj.text() == nameEx:
+                            self.menuDeleteFilesEx.removeAction(pObj)
+                            break
+            else:
+                self.loggers.warning("Don`t selection row")
+                self.loggers.warning(f"selection: text = {name} , ex = {nameEx}, path = {namePath}")
 
             self.loggers.debug('End')
 
