@@ -80,7 +80,7 @@ class TableModel(QAbstractTableModel):
     def intermediateTable(self, data):
         self.loggers.info('Start')
         self._intermediateTable = data
-        self.loggers.debug(f'Count row table={len(data)}')
+        self.loggers.info(f'Count row table={len(data)}')
 
     def data(self, index, role):
         """ Отображение данных в таблице.
@@ -473,15 +473,6 @@ class TableSourceCodeFiles(QTableView):
             self.menuDeleteFilesEx.setEnabled(False)
 
             self.qMenuTable = QMenu(self)
-            self.qMenuTable.addAction(self.actionDeleteFile)
-            self.qMenuTable.addMenu(self.menuDeleteFilesEx)
-            self.loggers.debug('End')
-
-        except Exception as err:
-            self.loggers.warning(f'Exception = {err}')
-#===============================================================================
-
-
             self.qMenuTable.addAction(self.actionDeleteFile)
             self.qMenuTable.addMenu(self.menuDeleteFilesEx)
             self.loggers.debug('End')
