@@ -178,6 +178,15 @@ class TableModel(QAbstractTableModel):
                 self.endRemoveRows()
                 break
         self.loggers.debug('Stop')
+
+    def clearAll(self):
+        """ Удаление всех строк в таблице
+        """
+        self.loggers.debug('Start')
+        self.beginRemoveRows(QModelIndex(), 0, len(self.intermediateTable)-1)
+        self._intermediateTable.clear()
+        self.endRemoveRows()
+        self.loggers.debug('Stop')
 #===============================================================================
 
 
@@ -418,6 +427,7 @@ class TableSourceCodeFiles(QTableView):
             self.loggers.info('Start')
             self.actionDeleteFile.setEnabled( False if len(self.srcModel.intermediateTable) == 0 else True)
             self.menuDeleteFilesEx.setEnabled(False if len(self.srcModel.intermediateTable) == 0 else True)
+            self.actionClearTable.setEnabled(False if len(self.srcModel.intermediateTable) == 0 else True)
             self.qMenuTable.exec(self.mapToGlobal(pos))
             self.loggers.info('End')
 
@@ -483,6 +493,22 @@ class TableSourceCodeFiles(QTableView):
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
 
+    def clearTable(self):
+        try:
+            self.loggers.info('Start')
+            # Очистка таблицы
+            self.srcModel.clearAll()
+
+            # Очистка фильтров
+            self.tableFilterEx.removeAllFilterEx()
+            self.listEx.clear()
+            self.dlgFilterEx.clearFilter()
+            self.menuDeleteFilesEx.clear()
+            self.changeIconFilter()
+
+            self.loggers.info('End')
+        except Exception as err:
+            self.loggers.warning(f'Exception = {err}')
 
     def createContextMenu(self):
         """ Создание контекстного меню таблицы
@@ -496,9 +522,15 @@ class TableSourceCodeFiles(QTableView):
             self.menuDeleteFilesEx = QMenu("Удалить файлы по расширению", self)
             self.menuDeleteFilesEx.setEnabled(False)
 
+            self.actionClearTable = QAction("Очистка таблицы", self)
+            self.actionClearTable.triggered.connect(self.clearTable)
+            self.actionClearTable.setEnabled(False)
+
             self.qMenuTable = QMenu(self)
             self.qMenuTable.addAction(self.actionDeleteFile)
             self.qMenuTable.addMenu(self.menuDeleteFilesEx)
+            self.qMenuTable.addSeparator()
+            self.qMenuTable.addAction(self.actionClearTable)
             self.loggers.debug('End')
 
         except Exception as err:

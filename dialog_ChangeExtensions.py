@@ -49,6 +49,17 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
         self.loggers.info('Start')
         self._is_filter = state
 
+
+    def __setCheckBoxSelectAll(self):
+        """ Установка checkbox 'Выделить всё'
+        """
+        self.loggers.info('Start')
+        newItem = QListWidgetItem("(Выделить всё)")
+        newItem.setCheckState(Qt.CheckState.Checked)
+        self.ui.listWidget_Extensions.insertItem(self.ui.listWidget_Extensions.count(), newItem)
+        self.is_filter = True
+
+
     def setFilters(self, filters: list):
         """ Установка списка фильтра
 
@@ -59,9 +70,7 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
             self.loggers.info('Start')
             self.ui.listWidget_Extensions.clear()
 
-            newItem = QListWidgetItem("(Выделить всё)")
-            newItem.setCheckState(Qt.CheckState.Checked)
-            self.ui.listWidget_Extensions.insertItem(self.ui.listWidget_Extensions.count(), newItem)
+            self.__setCheckBoxSelectAll()
 
             for filter in filters:
                 newItem = QListWidgetItem(filter)
@@ -74,7 +83,7 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
 
 
     def removeFilter(self, filter: str):
-        """ Удаленеи одного фидьтра
+        """ Удаленеи одного фильтра
 
         Args:
             filter (str): имя фильтра
@@ -86,6 +95,19 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
                 self.ui.listWidget_Extensions.removeItemWidget(
                     self.ui.listWidget_Extensions.takeItem(
                         self.ui.listWidget_Extensions.row(itemsFilter[0])))
+            self.loggers.info('End')
+
+        except Exception as err:
+            self.loggers.warning(f'Exception = {err}')
+
+    def clearFilter(self):
+        """ Сброс до дефолтного состояния
+        """
+        try:
+            self.loggers.info('Start')
+            self.ui.listWidget_Extensions.clear()
+            self.__setCheckBoxSelectAll()
+            self.is_filter = False
             self.loggers.info('End')
 
         except Exception as err:
