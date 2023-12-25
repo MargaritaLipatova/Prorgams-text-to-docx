@@ -49,7 +49,7 @@ class dialogIshodDocx(QDialog):
             self.loggers.info('start')
             self.ui = Ui_DialogIshodDocx()        # Инициализация ui-интерфейсов
             self.ui.setupUi(self)                 # Установка ui-интерфейсов
-            self.setWindowTitle("Исход-В v.1.0")  # Название программы с версией
+            self.setWindowTitle("Исход-В v.1.1")  # Название программы с версией
             self.cwd = os.getcwd()                # Получить текущее местоположение файла программы
             self.setWindowFlags(Qt.Window)        # Смена кнопок в диалговом окне вправом вехнем углу
 
@@ -115,20 +115,18 @@ class dialogIshodDocx(QDialog):
             NameDocx = self.ui.lineEdit_NameDocx.text()
             # NameFile = self.ui.lineEdit_NameFile.text()
             default_filename = os.path.join(self.cwd, NameDocx)
-
-            ##!!!!!!! В стадии написания и отладки
-            fileName_choose, filetype = QFileDialog.getSaveFileName(self,
-                                            "Сохранение файла",
-                                            default_filename, # Начальный путь
-                                            "Text Files (*.docx)"
+            fileName_choose, filetype = QFileDialog.getSaveFileName(
+                                            parent   =self,
+                                            caption  ="Сохранение файла",
+                                            directory=default_filename, # Начальный путь
+                                            filter   =self.tr("Text Files (*.docx)"),
+                                            options  =QFileDialog.DontUseNativeDialog
                                             )
-
             if fileName_choose == "":
-                self.loggers.info("\ nОтменить выбор")
+                self.loggers.info("Отменить выбор")
             else:
                 # Сохранить
-
-                self.loggers.info("\ nФайл, который вы выбрали для сохранения:")
+                self.loggers.info("Файл, который вы выбрали для сохранения:")
                 self.loggers.info(fileName_choose)
                 self.loggers.info(f"Тип фильтра файлов: {filetype}")
 
