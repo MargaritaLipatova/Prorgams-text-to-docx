@@ -10,28 +10,10 @@ import time
 import os
 
 
-@pytest.fixture
-def app(qtbot)->dialog_Ishod_w.dialogIshodDocx:
-    """ Создание основного приложение и подключение к qtbot
-
-    Args:
-        qtbot (_type_): Экземпляры этого класса отвечают
-        за отправку событий объектам Qt (обычно виджетам).
-        Имитация пользовательского ввода.
-
-    Returns:
-        dialog_Ishod_w.dialogIshodDocx: объект основного приложения
-    """
-    print('\n')
-    print('app start')
-    test_gui_app = dialog_Ishod_w.dialogIshodDocx()
-    qtbot.addWidget(test_gui_app)
-    test_gui_app.show()
-    return test_gui_app
 
 @pytest.fixture(scope = 'module')
 def global_data():
-    print('global_data start')
+    print('\nglobal_data start')
     return {'list_filters': [],
             "dir_parent": None,
             'res_scan_dir': set(),
@@ -42,10 +24,8 @@ def global_data():
 def fix_filter(app, qtbot, global_data):
     """Сообщает продолжительность теста после каждой функции."""
     start = time.time()
-    print('\n')
-    print('fix_filter start')
+    print('\nfix_filter start')
     def handle_dialog():
-        print('handle_dialog start')
         dialog = next(child
                         for child in app.children()
                         if isinstance(child, QFileDialog))
@@ -76,7 +56,6 @@ def test_filter_unchecked_all(app, qtbot, global_data):
         app.tvSourceCodeFiles.dlgFilterEx.ui.listWidget_Extensions.item(0).setCheckState(Qt.CheckState.Unchecked)
         app.tvSourceCodeFiles.dlgFilterEx.accept()
 
-    print('test_filter_zero start')
     QTimer.singleShot(100, handle_dialog_filter)
     qtbot.mouseClick(app.tvSourceCodeFiles.filter_pBtn, Qt.LeftButton)
     qtbot.wait(1000)
@@ -85,7 +64,6 @@ def test_filter_unchecked_all(app, qtbot, global_data):
 
 @pytest.mark.usefixtures("fix_filter")
 def test_filter_change(app, qtbot, global_data):
-    print('test_filter_two start')
     def handle_dialog_filter():
         # Снимается галочка "Выделить всё"
         # Устанавливается галочка на первых трёх фильтров и последнем фильтре

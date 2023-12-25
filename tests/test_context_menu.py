@@ -5,28 +5,7 @@ import pytest
 from PyQt5.QtCore import Qt, QTimer, QPoint
 from common import scanDir_typeTableDir
 from PyQt5.QtWidgets import QFileDialog,  QTreeView, QAction
-import dialog_Ishod_w
 import time
-import os
-
-
-@pytest.fixture
-def app(qtbot)->dialog_Ishod_w.dialogIshodDocx:
-    """ Создание основного приложение и подключение к qtbot
-
-    Args:
-        qtbot (_type_): Экземпляры этого класса отвечают
-        за отправку событий объектам Qt (обычно виджетам).
-        Имитация пользовательского ввода.
-
-    Returns:
-        dialog_Ishod_w.dialogIshodDocx: объект основного приложения
-    """
-    print('app start')
-    test_gui_app = dialog_Ishod_w.dialogIshodDocx()
-    qtbot.addWidget(test_gui_app)
-    test_gui_app.show()
-    return test_gui_app
 
 @pytest.fixture(scope = 'module')
 def global_data():
@@ -40,7 +19,6 @@ def global_data():
 def fix_context_menu(app, qtbot, global_data):
     """Сообщает продолжительность теста после каждой функции."""
     def handle_dialog():
-        print('handle_dialog start')
         # Поиск диалогового окна
         dialog = next(child for child in app.children() if isinstance(child, QFileDialog))
         # Поиск списка для выделения
@@ -68,15 +46,11 @@ def fix_context_menu(app, qtbot, global_data):
 @pytest.mark.usefixtures("fix_context_menu")
 def test_ctxMenu_delete(app, qtbot, global_data):
     def handle_ctx_menu():
-        print('handle_ctx_menu start')
-
         for act in app.tvSourceCodeFiles.qMenuTable.actions():
             if act.text() == 'Удалить':
                 act.trigger()
 
         app.tvSourceCodeFiles.qMenuTable.close()
-
-    print('test_filter_zero start')
 
     app.tvSourceCodeFiles.setFocus()
     app.tvSourceCodeFiles.selectRow(0)
@@ -88,14 +62,12 @@ def test_ctxMenu_delete(app, qtbot, global_data):
     before_row = app.tvSourceCodeFiles.model().rowCount()
 
     assert after_table != before_table
-    print(after_row, before_row)
     assert after_row != before_row
 
 
 @pytest.mark.usefixtures("fix_context_menu")
 def test_ctx_menu_delete_ex(app, qtbot, global_data):
     def handle_ctx_menu():
-        print('handle_ctx_menu start')
         i=0
         for menu_act in app.tvSourceCodeFiles.menuDeleteFilesEx.actions():
             menu_act.trigger()
@@ -105,8 +77,6 @@ def test_ctx_menu_delete_ex(app, qtbot, global_data):
 
         app.tvSourceCodeFiles.qMenuTable.close()
 
-    print('test_filter_zero start')
-
     app.tvSourceCodeFiles.setFocus()
     app.tvSourceCodeFiles.selectRow(0)
     after_table = app.tvSourceCodeFiles.getAllListTable()
@@ -117,7 +87,6 @@ def test_ctx_menu_delete_ex(app, qtbot, global_data):
     before_row = app.tvSourceCodeFiles.model().rowCount()
 
     assert after_table != before_table
-    print(after_row, before_row)
     assert after_row != before_row
 
 

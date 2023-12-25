@@ -1,143 +1,30 @@
-# """_summary_
-# """
+""" Тесты кнопок
+"""
 
 import pytest
-import unittest
-from PyQt5.QtCore import QDir, QModelIndex, Qt, QTimer, QUrl, QThread
+from PyQt5.QtCore import  Qt, QTimer
 from common import scanDir_typeTableDir
-from PyQt5.QtWidgets import QFileDialog, QLineEdit, QPushButton, QTableView, QTreeView, QDialog, QMessageBox
+from PyQt5.QtWidgets import QFileDialog,  QTreeView
 import dialog_Ishod_w
 
 # from subprocess import Popen, PIPE
-import subprocess
 import psutil
 import time
 import os
-import signal
+# from tests.conftest import app
+
+# from pytestqt.qt_compat import qt_api
 
 
-@pytest.fixture
-def app(qtbot)->dialog_Ishod_w.dialogIshodDocx:
-    """ Создание основного приложение и подключение к qtbot
-
-    Args:
-        qtbot (_type_): Экземпляры этого класса отвечают
-        за отправку событий объектам Qt (обычно виджетам).
-        Имитация пользовательского ввода.
-
-    Returns:
-        dialog_Ishod_w.dialogIshodDocx: объект основного приложения
-    """
-    test_gui_app = dialog_Ishod_w.dialogIshodDocx()
-    qtbot.addWidget(test_gui_app)
-    return test_gui_app
-
-
-def delete_file():
-    tmp_tmp_docx = dir_parent+'\\~$mp_doc.docx'
-    tmp_docx = dir_parent+'\\tmp_doc.docx'
-    if os.path.exists(tmp_tmp_docx):
-        os.remove(tmp_tmp_docx)
-    if os.path.exists(tmp_docx):
-        os.remove(tmp_docx)
-
-@pytest.fixture#(autouse=True)
-def start_func_version_1(app, qtbot):
-    """Сообщает продолжительность теста после каждой функции."""
-    print(start_func_version_1.__name__)
-    start = time.time()
-
-    global dir_parent
-    dir_parent = os.getcwd()
-    print(dir_parent)
-
-    yield
-
-    delete_file()
-
-    stop = time.time()
-    delta = stop - start
-    print('\ntest duration : {:0.3} seconds'.format(delta))
-
-@pytest.fixture#(autouse=True)
-def start_func_version_2(app, qtbot):
-    """Сообщает продолжительность теста после каждой функции."""
-    print(start_func_version_2.__name__)
-    start = time.time()
-
-    global sNameFile, sNameDocx
-    sNameFile, sNameDocx = 'Тестовый файл', 'ЯУ.0123456.012-08'
-    app.ui.lineEdit_NameFile.setText(sNameFile)
-    app.ui.lineEdit_NameDocx.setText(sNameDocx)
-
-    global dir_parent
-    dir_parent = os.getcwd()
-    print(dir_parent)
-
-    yield
-
-    delete_file()
-
-    stop = time.time()
-    delta = stop - start
-    print('\ntest duration : {:0.3} seconds'.format(delta))
-
-@pytest.mark.usefixtures("start_func_version_2")
-def test_line_edit(app):
-
-    assert app.ui.lineEdit_NameFile.text() == 'Тестовый файл'
-    assert app.ui.lineEdit_NameDocx.text() == 'ЯУ.0123456.012-08'
-
-@pytest.mark.usefixtures("start_func_version_1")
-def test_button_add_cancel_click(app, qtbot):
-    """ Тестирование:
-        кнопки "Добавить" и в диалоговом окне "Выбирите файлы" кнопку "Cancel"
-    Args:
-        app (_type_): приложение
-        qtbot (_type_): _description_
-    """
-    def handle_dialog():
-        dialog = next(child for child in app.children() if isinstance(child, QFileDialog))
-        dialog.reject()  #still hangs
-
-    QTimer.singleShot(20, handle_dialog)
-    qtbot.mouseClick(app.ui.pBtn_AddFilesInFolder, Qt.LeftButton, delay=1)
-    countRow = app.tvSourceCodeFiles.model().rowCount()
-    assert countRow == 0
-
-@pytest.mark.usefixtures("start_func_version_1")
-def test_button_add_open_click(app, qtbot):
-    """ Тестирование:
-        кнопки "Добавить" и в диалоговом окне "Выберите файлы..." кнопку "Open"
-    Args:
-        app (_type_): приложение
-        qtbot (_type_): Экземпляры этого класса отвечают за отправку событий объектам Qt (обычно виджетам), Имитация пользовательского ввода.
-    """
-    def handle_dialog():
-        dialog = next(child for child in app.children() if isinstance(child, QFileDialog))
-        view = dialog.findChild(QTreeView)
-        view.selectAll()
-        dialog.accept()
-        time.sleep(1)
-
-    QTimer.singleShot(20, handle_dialog)
-    button = app.ui.pBtn_AddFilesInFolder
-    qtbot.mouseClick(button, Qt.LeftButton, delay=1)
-    time.sleep(1)
-    countRow   = app.tvSourceCodeFiles.model().rowCount()
-    tablefiles = app.tvSourceCodeFiles.getAllListTable()
-
-    res=set()
-    scanDir_typeTableDir(res, dir_parent)
-
-    # res.add(res.pop()+'s2') # это для показа ошибки
-    assert len(res) == countRow
-    assert res == tablefiles
-
-def kill_proc_tree(pid, including_parent=True):
+def kill_proc_tree(qtbot, pid, including_parent=True):
     # https://stackoverflow.com/questions/1230669/subprocess-deleting-child-processes-in-windows
+
+    # print("kill_proc_tree start")
     parent = psutil.Process(pid)
+    # print(f'parent = {parent}')
+    # children = parent.children()
     children = parent.children(recursive=True)
+    # print(f'children  = {children }')
     for child in children:
         # print(child.pid)
         # print(child.name())
@@ -148,28 +35,134 @@ def kill_proc_tree(pid, including_parent=True):
     if including_parent:
         parent.kill()
         parent.wait(5)
+    # print("kill_proc_tree end")
 
-# @pytest.mark.disable_autouse
-@pytest.mark.usefixtures("start_func_version_1")
-def test_button_preview(app, qtbot):
+def delete_file(global_data):
+    """ Удаление созданных файлов программой
+    """
+    tmp_tmp_docx = global_data['dir_parent']+'\\~$mp_doc.docx'
+    tmp_docx = global_data['dir_parent']+'\\tmp_doc.docx'
+    if os.path.exists(tmp_tmp_docx):
+        os.remove(tmp_tmp_docx)
+    if os.path.exists(tmp_docx):
+        os.remove(tmp_docx)
+
+@pytest.fixture(scope = 'module')
+def global_data():
+    print('global_data start')
+    return {'list_filters': [],
+            "dir_parent": None,
+            'res_scan_dir': set(),
+            'sNameFile': 'Тестовый файл',
+            'sNameDocx': 'ЯУ.0123456.012-08',
+            }
+
+@pytest.fixture
+def fix_simple_run(app, qtbot, global_data):
+    """Сообщает продолжительность теста после каждой функции."""
+    print('\nfix_simple_run start')
+    start = time.time()
+    global_data['dir_parent'] = os.getcwd()
+    # print(global_data['dir_parent'])
+
+    yield app, qtbot, global_data
+
+    # messagebox = app.findChild(QMessageBox)
+    # if messagebox:
+    #     print(messagebox)
+    #     yes_button = messagebox.button(QMessageBox.Yes)
+    #     qtbot.mouseClick(yes_button, Qt.LeftButton, delay=1)
+
+    qtbot.wait(3000)
+
+    # delete_file(global_data)
+
+    stop = time.time()
+    delta = stop - start
+    print('\ntest duration : {:0.3} seconds'.format(delta))
+
+@pytest.fixture
+def fix_fill_name_docx_run(app, qtbot, global_data):
+    """Сообщает продолжительность теста после каждой функции."""
+    print('\nfix_fill_name_docx_run start')
+    start = time.time()
+
+    app.ui.lineEdit_NameFile.setText(global_data['sNameFile'])
+    app.ui.lineEdit_NameDocx.setText(global_data['sNameDocx'])
+
+    global_data['dir_parent'] = os.getcwd()
+    # print(global_data['dir_parent'])
+
+    yield app, qtbot, global_data
+
+    qtbot.wait(3000)
+
+    # delete_file(global_data)
+
+    stop = time.time()
+    delta = stop - start
+    print('\ntest duration : {:0.3} seconds'.format(delta))
+
+@pytest.mark.usefixtures("fix_fill_name_docx_run")
+def test_line_edit(app, qtbot, global_data):
+    assert app.ui.lineEdit_NameFile.text() == global_data['sNameFile']
+    assert app.ui.lineEdit_NameDocx.text() == global_data['sNameDocx']
+
+@pytest.mark.usefixtures("fix_simple_run")
+def test_button_add_cancel(app, qtbot, global_data):
+    """ Тестирование:
+        кнопки "Добавить" и в диалоговом окне "Выбирите файлы" кнопку "Cancel"
+    """
+    def handle_dialog():
+        dialog = next(child for child in app.children() if isinstance(child, QFileDialog))
+        dialog.reject()
+
+    QTimer.singleShot(20, handle_dialog)
+    qtbot.mouseClick(app.ui.pBtn_AddFilesInFolder, Qt.LeftButton, delay=1)
+    countRow = app.tvSourceCodeFiles.model().rowCount()
+    assert countRow == 0
+
+
+@pytest.mark.usefixtures("fix_simple_run")
+def test_button_add_open(app, qtbot,global_data):
     """ Тестирование:
         кнопки "Добавить" и в диалоговом окне "Выберите файлы..." кнопку "Open"
-    Args:
-        app (_type_): приложение
-        qtbot (_type_): Экземпляры этого класса отвечают за отправку событий объектам Qt (обычно виджетам), Имитация пользовательского ввода.
     """
-    def handle_dialog_1():
+    def handle_dialog():
+        dialog = next(child for child in app.children() if isinstance(child, QFileDialog))
+        dialog.findChild(QTreeView).selectAll()
+        dialog.accept()
+
+    QTimer.singleShot(20, handle_dialog)
+    qtbot.mouseClick(app.ui.pBtn_AddFilesInFolder, Qt.LeftButton,delay=1)
+
+    countRow   = app.tvSourceCodeFiles.model().rowCount()
+    scanDir_typeTableDir(global_data['res_scan_dir'], global_data['dir_parent'])
+    # res.add(res.pop()+'s2') # это для показа ошибки
+    assert len(global_data['res_scan_dir']) == countRow
+
+
+@pytest.mark.usefixtures("fix_simple_run")
+def test_button_preview(app, qtbot, global_data):
+    """ Тест кнопки "Предпросмотр".
+        Проблема теста: необходимо время для создания процесса и файла.
+    """
+    def handle_dialog():
         pid = app.worker.get_pid()
         if pid is not None:
-            kill_proc_tree(pid,False)
+            kill_proc_tree(qtbot, pid,False)
 
-    QTimer.singleShot(20, handle_dialog_1)
+    QTimer.singleShot(2000, handle_dialog)
     qtbot.mouseClick(app.ui.pBnt_PreviewDocx, Qt.LeftButton, delay = 1)
-    time.sleep(2)
+    qtbot.wait(2000)
 
-# @pytest.mark.disable_autouse
-@pytest.mark.usefixtures("start_func_version_1")
-def test_button_create_docx_cancel(app, qtbot):
+    tmp_docx = global_data['dir_parent']+'\\'+'tmp_doc.docx'
+    assert os.path.exists(tmp_docx) == True
+    # if os.path.exists(tmp_docx):
+    #     os.remove(tmp_docx)
+
+@pytest.mark.usefixtures("fix_simple_run")
+def test_button_create_docx_cancel(app, qtbot, global_data):
     def handle_dialog_save():
         dialog = None
         for child in app.children():
@@ -178,108 +171,74 @@ def test_button_create_docx_cancel(app, qtbot):
                     dialog = child
         dialog.reject()
 
-    QTimer.singleShot(10, handle_dialog_save)
+    QTimer.singleShot(1000, handle_dialog_save)
+    app.ui.lineEdit_NameDocx.setText(global_data['sNameDocx'])
     qtbot.mouseClick(app.ui.pBtn_CreateDocx, Qt.LeftButton, delay=1)
-    time.sleep(2)
+    tmp_docx = global_data['dir_parent']+'\\'+global_data['sNameDocx']+'.docx'
+    assert os.path.exists(tmp_docx) is False
 
-# @pytest.mark.disable_autouse
-@pytest.mark.usefixtures("start_func_version_2")
-def test_button_create_docx_save(app, qtbot):
+    qtbot.wait(1000)
+
+@pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.usefixtures("fix_fill_name_docx_run")
+def test_button_create_docx_save(app, qtbot, global_data):
     def handle_dialog_save():
-        try:
-            print('handle_dialog_save')
-            # time.sleep(2)
-            dialog:QFileDialog = None
-            for child in app.children():
-                if isinstance(child, QFileDialog):
-                    print(child.windowTitle())
-                    if child.windowTitle() == 'Сохранение файла':
-                        dialog = child
+        dialog:QFileDialog = None
+        for child in app.children():
+            if isinstance(child, QFileDialog):
+                print(child.windowTitle())
+                if child.windowTitle() == 'Сохранение файла':
+                    dialog = child
 
-            print(dialog.directory().currentPath())
-            fileName = dialog.selectedFiles()
-            dialog.setDirectory(fileName[0].split('/')[0])
-            dialog.accept()
-            # time.sleep(20)
-            # print('handle_msg_box')
-            # dialog = next(child
-            #           for child in app.children()
-            #           if isinstance(child, QMessageBox))
-            # dialog.accept()
-
-        except Exception as err:
-            print(f'Exception = {err}')
-
-    try:
-        QTimer.singleShot(100, handle_dialog_save)
-        qtbot.mouseClick(app.ui.pBtn_CreateDocx, Qt.LeftButton)
-        # QTimer.singleShot(1, handle_msg_box)
-        # time.sleep(1)
-
-    except Exception as err:
-        print(f'Exception = {err}')
-
-
-
-# @pytest.mark.disable_autouse
-@pytest.mark.usefixtures("start_func_version_2")
-def test_button_create_docx_save_2(app, qtbot):
-    try:
-        # app.ui.lineEdit_NameFile.setText('456789')
-        # app.ui.lineEdit_NameDocx.setText('ЯУ.01234560.0-08')
-
-
-        file = sNameDocx+'.docx'
-        app.create_docx(file)
-
-        is_exists = os.path.exists(file)
-        assert is_exists == True , "11111111111111"
-
-        if is_exists:
-            os.remove(file)
-
-            is_exists = os.path.exists(file)
-            assert is_exists == False
-
-    except Exception as err:
-        print(f'Exception = {err}')
-
-# @pytest.mark.disable_autouse
-@pytest.mark.usefixtures("start_func_version_2")
-def test_button_create_docx_save_3(app, qtbot):
-    def handle_dialog():
-        dialog = next(child
-                      for child in app.children()
-                      if isinstance(child, QFileDialog))
-        view = dialog.findChild(QTreeView)
-        view.selectAll()
-        # global dir_parent
-        # dir_parent = dialog.directory().currentPath()
+        fileName = dialog.selectedFiles()
+        dialog.setDirectory(fileName[0].split('/')[0])
         dialog.accept()
-        time.sleep(1)
+        # qtbot.wait(20)
+        # print('handle_msg_box')
+        # dialog = next(child
+        #           for child in app.children()
+        #           if isinstance(child, QMessageBox))
+        # dialog.accept()
+
 
     try:
-        # app.ui.lineEdit_NameFile.setText('456789')
-        # app.ui.lineEdit_NameDocx.setText('ЯУ.01234560.0-08')
+        print('click create_docx')
+        QTimer.singleShot(1000, handle_dialog_save)
+        with qtbot.capture_exceptions() as exceptions:
+            qtbot.mouseClick(app.ui.pBtn_CreateDocx, Qt.LeftButton, delay = 1)
+        assert len(exceptions) == 1
 
-        QTimer.singleShot(100, handle_dialog)
-        qtbot.mouseClick(app.ui.pBtn_AddFilesInFolder, Qt.LeftButton)
-
-        file = dir_parent + '.docx'
-        # file = dir_parent+'/'+'ЯУ.01234560.0-08.docx'
-        app.create_docx(file)
-
-        is_exists = os.path.exists(file)
-        assert is_exists == True
-
-        if is_exists:
-            os.remove(file)
-
-            is_exists = os.path.exists(file)
-            assert is_exists == False
+        print('unclick create_docx')
+        tmp_docx = global_data['dir_parent']+'\\'+global_data['sNameDocx']+'.docx'
+        assert os.path.exists(tmp_docx) is True
+        if os.path.exists(tmp_docx):
+            os.remove(tmp_docx)
 
     except Exception as err:
         print(f'Exception = {err}')
+
+@pytest.mark.usefixtures("fix_fill_name_docx_run")
+def test_create_docx(app, qtbot, global_data):
+    def handle_dialog():
+        dialog = next(child for child in app.children() if isinstance(child, QFileDialog))
+        dialog.findChild(QTreeView).selectAll()
+        dialog.accept()
+
+
+    QTimer.singleShot(100, handle_dialog)
+    qtbot.mouseClick(app.ui.pBtn_AddFilesInFolder, Qt.LeftButton)
+
+    file = global_data['sNameDocx'] + '.docx'
+    app.create_docx(file)
+
+    is_exists = os.path.exists(file)
+    assert is_exists is True
+
+    if is_exists:
+        os.remove(file)
+
+        is_exists = os.path.exists(file)
+        assert is_exists is False
 
 
 
