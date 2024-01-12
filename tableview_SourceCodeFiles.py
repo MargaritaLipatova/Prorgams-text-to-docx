@@ -223,8 +223,6 @@ class TableSourceCodeFiles(QTableView):
             self.setSelectionMode(self.SingleSelection)
             self.verticalHeader().setVisible(False)
 
-            self.listEx = []        # список расширений для колонки "Тип"
-
             # Фильтр на колонку "Тип"
             self.filter_pBtn:QPushButton = QPushButton(self.horizontalHeader())
             self.icon_filter_noAction:QIcon = QIcon(QPixmap(":/icon/icon/filter_no_action.png"))
@@ -296,9 +294,12 @@ class TableSourceCodeFiles(QTableView):
             self.dlgFilterEx.exec()
             self.changeIconFilter()
 
-            self.tableFilterEx.removeAllFilterEx()
-            for ftr in self.dlgFilterEx.getFilters():
-                self.tableFilterEx.setFilterEx(ftr)
+            # -----------------------------------
+            self.tableFilterEx.setFilters(self.dlgFilterEx.getFilters())
+            for act in self.menuDeleteFilesEx.actions():
+                act.setVisible(act.text() in self.dlgFilterEx.getFilters())
+            # -----------------------------------
+
             self.loggers.info('End')
 
         except Exception as err:
@@ -348,11 +349,12 @@ class TableSourceCodeFiles(QTableView):
             data (set): список путей файлов
         Returns:
             []: Массив для модели-представления
+            []: Массив с расширениями файлов
         """
         try:
             self.loggers.info('Start')
-            self.listEx = []
             intermediateTable = []
+            listEx = set()
             for path in data:
                 basename  = os.path.splitext(path)
                 file_name = os.path.basename(basename[0])
@@ -363,15 +365,16 @@ class TableSourceCodeFiles(QTableView):
                                             path          # path
                                             ])
 
-                if not ex in self.listEx:
-                    self.listEx.append(ex)
-                    self.tableFilterEx.setFilterEx(ex)
+
+                if not ex in listEx:
+                    listEx.add(ex)
+
 
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
         self.loggers.info('End')
 
-        return intermediateTable
+        return intermediateTable, listEx
 
     def setInfoModel(self, data: set)->None:
         """ Установка вида модели для отображения в таблице
@@ -380,10 +383,9 @@ class TableSourceCodeFiles(QTableView):
         """
         try:
             self.loggers.info('Start')
-            intermediateTable = self.__getIntermediateModel(data)
+            intermediateTable, listEx = self.__getIntermediateModel(data)
             # -----------------------------------
-            self.setActionEx()
-            self.setTableFilterEx()
+            self.settingFiltersEx(listEx)
             # -----------------------------------
             self.srcModel.insertRowFiles(intermediateTable)
             self.loggers.info('End')
@@ -391,25 +393,26 @@ class TableSourceCodeFiles(QTableView):
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
 
-    def setTableFilterEx(self):
-        """ Добавление расширений в фильтр
+    def settingFiltersEx(self, listEx: set):
+        """ Настройка фильтров расширений в фильтр
         """
         try:
             self.loggers.info('Start')
-            self.dlgFilterEx.setFilters(self.listEx)
-            # self.dlgFilterEx.removeFilter(self.listEx[0])
+            self.setActionEx(listEx)
+            self.tableFilterEx.setFilters(listEx)
+            self.dlgFilterEx.setFilters(listEx)
             self.loggers.info('End')
 
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
 
-    def setActionEx(self):
+    def setActionEx(self, listEx: set):
         """ Очищение и добавление расширений в меню "Удалить файлы по расширению"
         """
         try:
             self.loggers.info('Start')
             self.menuDeleteFilesEx.clear()
-            for ex in self.listEx:
+            for ex in listEx:
                 actEx = QAction(ex, self)
                 actEx.triggered.connect(self.deleteFilesEx)
                 self.menuDeleteFilesEx.addAction(actEx)
@@ -457,7 +460,6 @@ class TableSourceCodeFiles(QTableView):
                 # проверка не был ли этот файл единственным с таким расширением
                 if not any(item for item in self.srcModel.intermediateTable if item[2] == nameEx):
                     self.tableFilterEx.removeFilterEx(nameEx)
-                    self.listEx.remove(nameEx)
                     self.dlgFilterEx.removeFilter(nameEx)
 
                     for pObj in self.menuDeleteFilesEx.actions():
@@ -484,7 +486,6 @@ class TableSourceCodeFiles(QTableView):
 
             self.srcModel.removeRowExs(nameEx)
             self.tableFilterEx.removeFilterEx(nameEx)
-            self.listEx.remove(nameEx)
             self.dlgFilterEx.removeFilter(nameEx)
             self.menuDeleteFilesEx.removeAction(pObj)
 
@@ -501,7 +502,6 @@ class TableSourceCodeFiles(QTableView):
 
             # Очистка фильтров
             self.tableFilterEx.removeAllFilterEx()
-            self.listEx.clear()
             self.dlgFilterEx.clearFilter()
             self.menuDeleteFilesEx.clear()
             self.changeIconFilter()

@@ -57,7 +57,7 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
         newItem = QListWidgetItem("(Выделить всё)")
         newItem.setCheckState(Qt.CheckState.Checked)
         self.ui.listWidget_Extensions.insertItem(self.ui.listWidget_Extensions.count(), newItem)
-        self.is_filter = True
+        self.is_filter = False
 
 
     def setFilters(self, filters: list):
@@ -83,7 +83,7 @@ class dialogChangeExtensions(QDialog, Ui_dialogChangeExtensions):
 
 
     def removeFilter(self, filter: str):
-        """ Удаленеи одного фильтра
+        """ Удаление одного фильтра
 
         Args:
             filter (str): имя фильтра

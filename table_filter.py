@@ -30,6 +30,14 @@ class TableFilterEx(QSortFilterProxyModel):
         try:
             index: QModelIndex = self.sourceModel().index(sourceRow, self.filterKeyColumn(), sourceParent)
             textEx = self.sourceModel().data(index, role = Qt.DisplayRole)
+            count = len(self.sourceModel().intermediateTable)
+
+            # Проверка!!!
+            # Модель не сразу заполняется.
+            # В массиве sourceModel().intermediateTable может не быть
+            # ещё строки sourceRow. И произойдет выход за пределы массива.
+            if count <= 0 or count <= sourceRow:
+                return False
 
             if textEx in self._listEx:
                 # Строка видна
@@ -54,6 +62,14 @@ class TableFilterEx(QSortFilterProxyModel):
         self._listEx.add(sEx)
         self.invalidateFilter()
 
+    def setFilters(self, set_list: set):
+        """ Устанавка set
+        Args:
+            sEx (set): список расширений
+        """
+        self.loggers.info('Start')
+        self._listEx = set_list
+        self.invalidateFilter()
 
     def removeFilterEx(self, sEx: str):
         """ Удаление одного фильтра
