@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-__summury__
-Created on Sun June 11 2023
+     Файл содержит реализацию proxy модели, которая является
+    посредником между таблицей и моделью представления.
+     ProxyModel осуществляет фильтрацию строк и записывает в модель представления
+    состояние строки по фильтру([0]) .
+
+    Created on Sun June 11 2023
 @author: Vasilyeva
 """
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import *
+from PyQt5.QtCore import QModelIndex, QSortFilterProxyModel, Qt
 
-from common import *
-from dialog_ChangeExtensions import dialogChangeExtensions
 import loggers
 
-class TableFilterEx(QtCore.QSortFilterProxyModel):
+
+class TableFilterEx(QSortFilterProxyModel):
     def __init__(self, parent=None):
         super(TableFilterEx, self).__init__(parent)
 
@@ -26,9 +28,16 @@ class TableFilterEx(QtCore.QSortFilterProxyModel):
 
     def filterAcceptsRow(self, sourceRow: int, sourceParent: QModelIndex):
         try:
-            self.loggers.info('Start')
             index: QModelIndex = self.sourceModel().index(sourceRow, self.filterKeyColumn(), sourceParent)
             textEx = self.sourceModel().data(index, role = Qt.DisplayRole)
+            count = len(self.sourceModel().intermediateTable)
+
+            # Проверка!!!
+            # Модель не сразу заполняется.
+            # В массиве sourceModel().intermediateTable может не быть
+            # ещё строки sourceRow. И произойдет выход за пределы массива.
+            if count <= 0 or count <= sourceRow:
+                return False
 
             if textEx in self._listEx:
                 # Строка видна
@@ -37,25 +46,47 @@ class TableFilterEx(QtCore.QSortFilterProxyModel):
             else:
                 # Строка скрыта
                 self.sourceModel().intermediateTable[sourceRow][0] = True
-                # if not (self.sourceModel().data(index, role = Qt.DisplayRole) in filter): # Если какой-либо фильтр присутствует в строке
-                #     return True
-                #     # return self.sourceModel().data(index).toString().contains(filter)
+                return False
         except Exception as err:
             self.loggers.warning(f'Exception = {err}')
 
         return False
 
-    def setFilterEx(self, sEx):
+    def setFilterEx(self, sEx: str):
+        """ Устанавка одного фильтра
+
+        Args:
+            sEx (str): имя фильтра
+        """
         self.loggers.info('Start')
         self._listEx.add(sEx)
+        self.invalidateFilter()
 
-    def removeFilterEx(self, sEx):
+    def setFilters(self, set_list: set):
+        """ Устанавка set
+        Args:
+            sEx (set): список расширений
+        """
+        self.loggers.info('Start')
+        self._listEx = set_list
+        self.invalidateFilter()
+
+    def removeFilterEx(self, sEx: str):
+        """ Удаление одного фильтра
+
+        Args:
+            sEx (str): имя фильтра
+        """
         self.loggers.info('Start')
         self._listEx.remove(sEx)
+        self.invalidateFilter()
 
     def removeAllFilterEx(self):
+        """Очистка спсика фильтра
+        """
         self.loggers.info('Start')
         self._listEx.clear()
+        self.invalidateFilter()
 
 
 
