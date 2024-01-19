@@ -6,16 +6,18 @@ Created on Wed Dec 14 23:24:09 2022
 """
 import os
 import subprocess
+from functools import partial
 
 from PyQt5.QtCore import QObject, Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QFileDialog, QFormLayout, QMessageBox
-from functools import partial
+
 import loggers
 from common import getOpenFilesAndDirs, scanDir_typeTableDir
 from convert_to_docx import Src2Docx
 from tableview_SourceCodeFiles import TableSourceCodeFiles
-from ui_files.ui_ishod_w import \
-    Ui_DialogIshodDocx  # импорт нашего сгенерированного файла
+from ui_files.ui_ishod_w import (
+    Ui_DialogIshodDocx,  # импорт нашего сгенерированного файла
+)
 
 
 class Worker(QObject):
@@ -130,7 +132,7 @@ class dialogIshodDocx(QDialog):
                 self.loggers.info(fileName_choose)
                 self.loggers.info(f"Тип фильтра файлов: {filetype}")
 
-                self.create_docx(fileName_choose)
+                self.create_docx(fileName_choose + ".docx")
                 QMessageBox.information(self, "Сохранение завершено!", "Не забудьте проверить фаил и обновить поле с количеством страниц!")
 
         except Exception as err:
